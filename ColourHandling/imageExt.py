@@ -9,6 +9,7 @@ from . import detect, replace
 # Symbolic info is also in here, such as colour <-> symbol mappings
 
 
+# TODO store as IDs and convert back to colours on output, so add converter
 class imageExt:
 
 #   def __init__(self):
@@ -71,6 +72,10 @@ class imageExt:
     # Identify number of distinct colours and create two way dicts to Ids
     colours = detect.findColours(pixels, sz)
     colourMaps = replace.mapColours(colours)
+
+    # TODO convert from pixel accessor to plain array for further processing
+    
+    # TODO store as ids?
 
     return imageExt(pixels, sz, colourMaps, im.mode)
 
