@@ -19,6 +19,8 @@
 from PIL import Image
 from sys import argv
 
+from ColourHandling import *
+
 def print_use():
   """Print usage information"""
   print("Please supply filename first and remaining arguments with '=', e.g. `style=d`")

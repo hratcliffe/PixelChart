@@ -3,6 +3,10 @@
 # See txt file for shapes
 
 _symSize = 9
+_edgSize = 1
+
+_symbols = []
+
 from os import linesep
 
 class SymbolDefinitionError(Exception):
@@ -48,6 +52,7 @@ def readSymbols():
   offset = 0
   while True:
     try:
+      # One line in between symbols for the titles etc
       dataInit = lines[offset+1: offset+_symSize+1]
       dataProcessed = []
       for item in dataInit:
@@ -62,8 +67,24 @@ def readSymbols():
       # Some sort of problem with symbols file - raise error
       raise SymbolDefinitionError
       break
-    offset = offset+_symSize+1
+    offset = offset + _symSize + 1
   return symbols
         
-    
+def getUpscaling():
+  """ Upscaling needed to accomodate symbols in image"""
+  global _symSize, _edgSize
+  return _symSize + _edgSize
 
+def loadSymbols():
+
+  # TODO Only load if not already??
+  global _symbols
+  
+  _symbols = readSymbols()
+  
+def getSymbol(id):
+
+  if id < len(_symbols):
+    return _symbols[id]
+  else:
+    return _symbols[-1]
