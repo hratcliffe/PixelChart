@@ -52,7 +52,6 @@ class imageExt:
     
     sz = im.size
     
-    print(resize)
     if resize is not None:
       if isinstance(resize, int):
         if sz[0] != resize:
@@ -61,7 +60,7 @@ class imageExt:
       elif len(resize) == 2 and sz != resize:
         do_resize = True
         new_size = resize
-      im = im.resize(new_size, Image.BICUBIC)
+      im = im.resize(new_size, Image.ANTIALIAS)
 
     sz = im.size
     # Get pixel map to modify
