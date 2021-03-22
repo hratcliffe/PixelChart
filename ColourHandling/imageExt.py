@@ -11,39 +11,21 @@ from . import detect, replace
 
 # TODO store as IDs and convert back to colours on output, so add converter
 class imageExt:
-
-#   def __init__(self):
-#     self.colourMap = None # Map from colours to symbols
-#     self.codeImage = None # Image (preferaby as array of ids)
-#     self.runImage = None  # Image as run-length encoded. Stored as list of lists by row
-#     self.colourCounts = None # Map from colours to count of pixels
-#     self.imSize = (0,0)
-#     self.imMode = 'RGB'
     
-    
-  def __init__(self, image, sz, maps, mode):
+  def __init__(self, image, pixels, maps):
     self.colourMap = maps
-    self.codeImage = image # TODO check if is ID coded and fi?
-    im, counts = extractRunAndCounts(image, sz)
+    self.coreImage = image
+    self.coreImagePixels = pixels
+    im, counts = extractRunAndCounts(pixels, image.size)
     self.runImage = im
     self.colourCounts = counts
-    self.imSize = sz
-    self.imMode = mode
     
-  def changeImage(self, image, sz):
-    """ Change the core image, size or content but NOT colour"""
-    self.codeImage = image # TODO check if is ID coded and fi?
-    im, counts = extractRunAndCounts(image, sz)
-    self.runImage = im
-    self.colourCounts = counts
-    self.imSize = sz
-
   def getColourWithMode(self, colourTriplet):
     """Change from given colour into correct form for mode of this image"""
     
-    if self.mode == 'RGB':
+    if self.coreImage.mode == 'RGB':
       colour = colourTriplet
-    elif self.mode == 'RGBA':
+    elif self.coreImage.mode == 'RGBA':
       a, b, c = colourTriplet
       colour = (a, b, c, 255)
     else:
@@ -70,14 +52,12 @@ class imageExt:
     pixels = im.load()
     sz = im.size
     # Identify number of distinct colours and create two way dicts to Ids
-    colours = detect.findColours(pixels, sz)
+    colours = findColours(pixels, sz)
     colourMaps = replace.mapColours(colours)
 
-    # TODO convert from pixel accessor to plain array for further processing
-    
     # TODO store as ids?
 
-    return imageExt(pixels, sz, colourMaps, im.mode)
+    return imageExt(im, pixels, colourMaps)
 
     
     
@@ -114,8 +94,24 @@ def extractRunAndCounts(image, im_sz):
 
   return (ImRLE, colCounts)  
 
+def findColours(pixels, sz):
+  """Find all unique colours in an image
+     For a true PixelArt Image, these will be identical RGB
+     TODO allow small deviation such as slight aliasing etc
+  """
 
+  # NOTE does not use PIL getcolours because number is unknown and want to allow for the slight deviations
 
+  colours = set()
+
+  for i in range(sz[0]):
+    for j in range(sz[1]):
+      colours.add(pixels[i,j])
+
+  return colours
+  
+
+# Custom errors. 
 class ImageReadError(Exception):
   pass
 
