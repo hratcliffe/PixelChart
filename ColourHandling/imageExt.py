@@ -1,5 +1,6 @@
 from PIL import Image
 from . import detect, replace
+from math import floor
 
 
 # Defines an extended image, which includes all of the stuff
@@ -34,7 +35,8 @@ class imageExt:
     return colour
     
   @classmethod
-  def imageFromFile(cls, filename):
+  def imageFromFile(cls, filename, resize = None):
+    """Create extended image from a file. Resize is either none (as in file), a single number, assumed to be image WIDTH and aspect ratio is preserved, or a pair, width x height."""
 
     #Open image
     try:
@@ -48,9 +50,23 @@ class imageExt:
     if im.mode == 'P':
       im = im.convert('RGB')
     
+    sz = im.size
+    
+    print(resize)
+    if resize is not None:
+      if isinstance(resize, int):
+        if sz[0] != resize:
+          do_resize = True
+          new_size = (resize, floor(resize * sz[1]/sz[0]))
+      elif len(resize) == 2 and sz != resize:
+        do_resize = True
+        new_size = resize
+      im = im.resize(new_size, Image.BICUBIC)
+
+    sz = im.size
     # Get pixel map to modify
     pixels = im.load()
-    sz = im.size
+    
     # Identify number of distinct colours and create two way dicts to Ids
     colours = findColours(pixels, sz)
     colourMaps = replace.mapColours(colours)
