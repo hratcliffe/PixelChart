@@ -31,13 +31,17 @@ def mergeColours(pixels, sz, n_cols=20):
  
   # Runs a __single__ initialisation trial with requested number of clusters 
   # This might work OK for an image, but might be better turned up
-  kmeans = KMeans(init="random", n_clusters=n_cols, n_init=1, max_iter=300,random_state=42)  
+  kmeans = KMeans(n_clusters=n_cols, n_init=5, random_state=42)  
   
   kmeans.fit(data)
+
+  # Report on result  
+  print("Colour reduction complete after {} iterations. Final inertia {}".format(kmeans.n_iter_, kmeans.inertia_))
+
   
   # Create new image where each colour is remapped to the centroid of its cluster. NB we could skip this and go straight to indexing by cluster number... TODO do something about that?
   
-  # TODO can we just do the clustering on the colour list instead? Is it very slow to do replacements?
+  # TODO can we just do the clustering on the colour list instead? Is it very slow to do replacements? We could create a map to do it with
   
   new_colours = []
   # Convert from arrays back to tuples
@@ -47,19 +51,17 @@ def mergeColours(pixels, sz, n_cols=20):
   # Create new image with replaced colours. Initialise to 0s
   imNew = Image.new('RGB', sz, (0,0,0))
   pixelsNew = imNew.load()
-
   
   # Remap
-  for k in range(sz[0]*sz[1]):
+  for k in range(0, sz[0]*sz[1]-1):
     # TODO check this logic is right way round for non-squre
     j = int(floor(k/sz[1]))
     i = int(k - j * sz[1])
     cluster_num = kmeans.labels_[k]
     new_val = [int(c) for c in new_colours[cluster_num]]
     new_val = tuple(new_val)
-
     #TODO is this transposing input image?
-    pixelsNew[i,j] = new_val
+    pixelsNew[j, i] = new_val
 
   return imNew
   
