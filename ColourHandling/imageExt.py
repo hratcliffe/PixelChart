@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageCms
 from . import detect, replace
 from math import floor
 
@@ -20,6 +20,8 @@ class imageExt:
     im, counts = extractRunAndCounts(pixels, image.size)
     self.runImage = im
     self.colourCounts = counts
+    self.optImage = None
+    self.optImageInUse = False
     
   def getColourWithMode(self, colourTriplet):
     """Change from given colour into correct form for mode of this image"""
@@ -34,6 +36,72 @@ class imageExt:
     
     return colour
     
+  def setOptimisedMode(self):
+    """Convert core image into whatever mode we determine is best. This may be varied depending on content. Any modifications to image are undone by the output stages """
+    
+    self.optImage = changeModeGeneric(self.coreImage, "RGB", "LAB")
+    
+    return self
+  
+  def getImage(self):
+    # TODO THESE SHOULD BE COPIES! 
+    if self.optImage is not None:
+      self.optImageInUse = True
+      return self.optImage
+    else:
+      try:
+        self.setOptimisedMode()
+        self.optImageInUse = True
+        return self.optImage
+      except:
+        return self.coreImage
+      
+  def setImage(self, image):
+    """Put back a modified image. Stores the various forms etc """
+    
+    if image.mode == "RGB" or image.mode == "RGBA":
+      self.coreImage = image
+      self.optImage = None
+      self.optImageInUse = False
+      self.coreImagePixels = image.load()
+      
+      self.colourMap = replace.mapColours(findColours(self.coreImagePixels, image.size))
+      pixels = self.coreImagePixels
+      im, counts = extractRunAndCounts(pixels, image.size)
+      self.runImage = im
+      self.colourCounts = counts
+    else:
+      newIm = changeModeGeneric(image, image.mode, "RGB")
+      self.coreImage = newIm
+      self.optImage = None
+      self.optImageInUse = False
+      self.coreImagePixels = newIm.load()
+      
+      self.colourMap = replace.mapColours(findColours(self.coreImagePixels, image.size))
+      pixels = self.coreImagePixels
+      im, counts = extractRunAndCounts(pixels, newIm.size)
+      self.runImage = im
+      self.colourCounts = counts
+
+  def show(self):
+  
+    """ Wraps show so that we can keep variuos images sync'd etc"""
+    
+    if self.optImageInUse:
+      self.setImage(self.optImage)
+      
+    self.coreImage.show()
+
+  def save(self):
+  
+    """ Wraps save so that we can keep variuos images sync'd etc"""
+    
+    if self.optImageInUse:
+      self.setImage(self.optImage)
+      
+    self.coreImage.save()
+
+
   @classmethod
   def imageFromFile(cls, filename, resize = None):
     """Create extended image from a file. Resize is either none (as in file), a single number, assumed to be image WIDTH and aspect ratio is preserved, or a pair, width x height."""
@@ -53,6 +121,7 @@ class imageExt:
     sz = im.size
     
     if resize is not None:
+      do_resize = False
       if isinstance(resize, int):
         if sz[0] != resize:
           do_resize = True
@@ -60,7 +129,8 @@ class imageExt:
       elif len(resize) == 2 and sz != resize:
         do_resize = True
         new_size = resize
-      im = im.resize(new_size, Image.ANTIALIAS)
+      if do_resize:
+        im = im.resize(new_size, Image.ANTIALIAS)
 
     sz = im.size
     # Get pixel map to modify
@@ -125,6 +195,24 @@ def findColours(pixels, sz):
 
   return colours
   
+def changeModeGeneric(image, init, final):
+
+  # TODO find a saner way to make these changes
+  if init == "RGB":
+    init_profile = ImageCms.createProfile("sRGB")
+  else:
+    init_profile = ImageCms.createProfile(init)
+
+  if final == "RGB":
+    final_profile = ImageCms.createProfile("sRGB")
+  else:
+    final_profile  = ImageCms.createProfile(final)
+
+  # TODO stash transforms? How much do we use them?
+  transform = ImageCms.buildTransformFromOpenProfiles(init_profile, final_profile, init, final)
+
+  return ImageCms.applyTransform(image, transform)
+
 
 # Custom errors. 
 class ImageReadError(Exception):

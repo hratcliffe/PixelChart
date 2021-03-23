@@ -29,7 +29,7 @@ def mergeColours(imageIn, n_cols=20):
     new_colours.append (tuple(item))
 
   # Create new image with replaced colours. Initialise to 0s
-  imNew = Image.new('RGB', sz, (0,0,0))
+  imNew = Image.new(imageIn.mode, sz, (0,0,0))
   pixelsNew = imNew.load()
   
   # Remap
