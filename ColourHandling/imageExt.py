@@ -198,6 +198,8 @@ def findColours(pixels, sz):
 def changeModeGeneric(image, init, final):
 
   # TODO find a saner way to make these changes
+  # Note : "["LAB", "XYZ", "sRGB"]" are available colour spaces"
+  
   if init == "RGB":
     init_profile = ImageCms.createProfile("sRGB")
   else:
