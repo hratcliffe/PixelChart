@@ -1,14 +1,35 @@
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QLabel, QDialog
+from PyQt5.QtWidgets import QApplication, QLabel, QDialog, QFileDialog
 from importlib_resources import files
 
+from os import path
 import sys
 
-class FileHandler():
+class FileLoader():
+
+  def __init__(self, window, fileH):
+
+    window.LoadButton.clicked.connect(self.load_file)
+    self.window = window
+    self.details = fileH
+
+  def load_file(self):
+  
+    loader = QFileDialog()
+    loader.setFileMode(QFileDialog.ExistingFile)    
+    loader.show()
+    if(loader.exec_()):
+      filename = loader.selectedFiles()[0]
+      self.details.fill_filename(filename)
+      self.window.load_triggered(filename)
+
+
+class FileDetailsHandler():
 
   def __init__(self, window):
 
     self.extras_dict = {}
+    self.window = window
   
     fill_file_combos(window)
     setup_file_info(window, "dummy.jpg")
@@ -18,13 +39,14 @@ class FileHandler():
 
 
   def extras_button_clicked(self):
-    # SHould this dialog be modal or not??
-    
     extrasDialog = FileExtras(self.extras_dict)
     extrasDialog.exec_()
-    
     self.extras_dict = extrasDialog.get_selections()
-    print(self.extras_dict)
+
+  def fill_filename(self, name):
+    short_name = path.basename(name)
+    self.window.filename_show.setText(short_name)
+    self.window.filename_show.setToolTip(name)
 
 
 class FileExtras(QDialog):
@@ -35,7 +57,6 @@ class FileExtras(QDialog):
     super(FileExtras, self).__init__() # Call the inherited classes __init__ method
     uic.loadUi(self.dialog_file, self) # Load the .ui file
     
-    print(selections)
     try:
       if selections["ColourNumbers"]:
         self.colour_check.setChecked(True) 
