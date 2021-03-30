@@ -1,6 +1,7 @@
 from PyQt5 import uic, QtCore
 from PyQt5.QtWidgets import QApplication, QLabel, QDialog, QFileDialog
 from importlib_resources import files
+from copy import deepcopy
 
 from os import path
 import sys
@@ -11,7 +12,10 @@ class FileLoader():
 
   def __init__(self, window, fileH):
 
-    window.LoadButton.clicked.connect(self.load_file)
+    window.LoadButton.clicked.connect(self.load_file)   
+    window.SaveButton.clicked.connect(self.save_file)
+    window.PatternButton.clicked.connect(self.save_pattern)
+ 
     self.window = window
     self.details = fileH
 
@@ -26,11 +30,32 @@ class FileLoader():
       self.window.load_triggered(filename)
 
 
+  def save_file(self):
+  
+    loader = QFileDialog()
+    loader.setAcceptMode(QFileDialog.AcceptSave)
+    loader.setFileMode(QFileDialog.AnyFile)    
+    loader.show()
+    if(loader.exec_()):
+      filename = loader.selectedFiles()[0]
+
+  def save_pattern(self):
+  
+    loader = QFileDialog()
+    loader.setAcceptMode(QFileDialog.AcceptSave)
+    loader.setFileMode(QFileDialog.AnyFile)    
+    loader.show()
+    if(loader.exec_()):
+      filename = loader.selectedFiles()[0]
+      stuff = self.details.get_details()
+      print(stuff)      
+
+
 class FileDetailsHandler():
 
   def __init__(self, window):
 
-    self.extras_dict = {}
+    self.extras_dict = {"ColourNumbers":False, "LengthEstimates":False,    "FinalSize":False}
     self.window = window
   
     fill_file_combos(window)
@@ -54,11 +79,19 @@ class FileDetailsHandler():
     self.window.ht_adj_slider.setValue(ht)
     self.window.wid_label.setText(str(wid))
     self.window.ht_label.setText(str(ht))
+
+  def get_details(self):
+    details = deepcopy(self.extras_dict)
     
+    details["Symbols"] = self.window.symbols_check.isChecked()
+    details["Key"] = self.window.key_check.isChecked()
+    details["Gauge"] = self.window.gauge_box.currentData()
+    
+    return details
+        
 
 #  @QtCore.pyqtSlot(ImagePayload)
   def on_image_changed(self, value):
-    print(value.sz)
     self.set_resize_sliders(value.sz.width(), value.sz.height())
 
 
@@ -103,7 +136,7 @@ def setup_file_info(window, name):
   
 def fill_file_combos(window):
 
-  window.gauge_box.addItem("14")
-  window.gauge_box.addItem("16")
-  window.gauge_box.addItem("18")
+  window.gauge_box.addItem("14", 14)
+  window.gauge_box.addItem("16", 16)
+  window.gauge_box.addItem("18", 18)
 

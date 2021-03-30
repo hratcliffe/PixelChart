@@ -454,7 +454,7 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QPushButton" name="create_button">
+        <widget class="QPushButton" name="PatternButton">
          <property name="sizePolicy">
           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
