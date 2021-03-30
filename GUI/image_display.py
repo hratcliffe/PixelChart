@@ -4,14 +4,17 @@ import PyQt5.QtCore as qtc
 #import KeepAspectRatio, SmoothTransformation
 
 from ColourHandling import *
+from .types import ImagePayload
 
-
-class ImageHandler():
+class ImageHandler(qtc.QObject):
+  image_changed = qtc.pyqtSignal(ImagePayload, name="image_changed")
 
   def __init__(self, window):
+    super(ImageHandler, self).__init__()
     self.window = window
     self.pane = window.image_pane
     self.image_hook = window.image_hook
+
     
   def change_image(self, filename):
   
@@ -27,5 +30,12 @@ class ImageHandler():
     self.image_hook.setPixmap(pixmap)
     self.image_hook.adjustSize()
     self.image_hook.show()
+
+    self.image_changed.emit(ImagePayload(im_sz))
+    
+
+  def resize_image(self):
+    pass
+    
 
     

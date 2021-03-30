@@ -1,9 +1,11 @@
-from PyQt5 import uic
+from PyQt5 import uic, QtCore
 from PyQt5.QtWidgets import QApplication, QLabel, QDialog, QFileDialog
 from importlib_resources import files
 
 from os import path
 import sys
+
+from .types import ImagePayload
 
 class FileLoader():
 
@@ -37,7 +39,6 @@ class FileDetailsHandler():
     self.extras_button = window.extras_button
     self.extras_button.clicked.connect(self.extras_button_clicked) 
 
-
   def extras_button_clicked(self):
     extrasDialog = FileExtras(self.extras_dict)
     extrasDialog.exec_()
@@ -48,12 +49,23 @@ class FileDetailsHandler():
     self.window.filename_show.setText(short_name)
     self.window.filename_show.setToolTip(name)
 
+  def set_resize_sliders(self, wid, ht):
+    self.window.wid_adj_slider.setValue(wid)
+    self.window.ht_adj_slider.setValue(ht)
+    self.window.wid_label.setText(str(wid))
+    self.window.ht_label.setText(str(ht))
+    
+
+#  @QtCore.pyqtSlot(ImagePayload)
+  def on_image_changed(self, value):
+    print(value.sz)
+    self.set_resize_sliders(value.sz.width(), value.sz.height())
+
 
 class FileExtras(QDialog):
   dialog_file = files('GUI').joinpath('ExtrasDialog.ui')
 
   def __init__(self, selections={}):
-    print("Showing Dialog")
     super(FileExtras, self).__init__() # Call the inherited classes __init__ method
     uic.loadUi(self.dialog_file, self) # Load the .ui file
     
