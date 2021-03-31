@@ -39,3 +39,6 @@ def cross_connect(window):
 
   window.imageH.image_changed.connect(window.fileH.on_image_changed)   
   window.imageH.image_changed.connect(window.colourH.on_image_changed)
+  
+  window.colourH.image_change_request.connect( window.imageH.on_image_change_request)
+

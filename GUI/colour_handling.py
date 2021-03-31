@@ -45,10 +45,7 @@ class ColourOptionsHandler(qtc.QObject):
     
     vals = {"Emphasize": self.window.emphasize_select.currentData(), "Optimize": self.window.optimize_select.currentData()}
     
-    dat = ColourPayload(num, opts=vals)
-    print(dat.n_cols, dat.opts)
-    
-
+    self.image_change_request.emit(ImageChangePayload(num, opts=vals))
         
 
 #  @QtCore.pyqtSlot(ImageStatePayload)

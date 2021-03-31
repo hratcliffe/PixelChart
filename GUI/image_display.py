@@ -45,4 +45,16 @@ class ImageHandler(qtc.QObject):
     pass
     
 
+  def modify_image(self, image, change_payload):
+    """Modify the given image according to the given ImageChangePayload"""
+  
+    new_image = mergeColours(image.coreImage, change_payload.n_cols)
+    # TODO this is pretty clumsy...
+    image.setImage(new_image)
+    self.change_image(image)
+    
+  #  @QtCore.pyqtSlot(ImageChangePayload)
+  def on_image_change_request(self, value):
+    self.modify_image(self.full_image, value)
+    
     
