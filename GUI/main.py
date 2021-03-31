@@ -37,4 +37,5 @@ def run_app(args):
 
 def cross_connect(window):
 
-  window.imageH.image_changed.connect(window.fileH.on_image_changed)
+  window.imageH.image_changed.connect(window.fileH.on_image_changed)   
+  window.imageH.image_changed.connect(window.colourH.on_image_changed)

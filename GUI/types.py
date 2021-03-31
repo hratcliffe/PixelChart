@@ -1,6 +1,7 @@
 class ImagePayload():
-  def __init__(self, sz):
+  def __init__(self, sz, n_cols=-1):
     self.sz = sz
+    self.n_cols = n_cols
 
 
 class ColourPayload():

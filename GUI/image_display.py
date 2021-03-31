@@ -37,8 +37,8 @@ class ImageHandler(qtc.QObject):
     self.image_hook.adjustSize()
     self.image_hook.show()
 
-    self.image_changed.emit(ImagePayload(im_sz))
-
+    im_cols = len(self.full_image.colourCounts)
+    self.image_changed.emit(ImagePayload(im_sz, im_cols))
     
 
   def resize_image(self):
