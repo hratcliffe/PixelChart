@@ -43,7 +43,13 @@ class imageExt:
     
     return self
   
-  def getImage(self):
+  def getImage(self, opt= None):
+
+    if opt is not None and opt is False:
+      self.optImageInUse = False
+      return self.coreImage
+      
+
     # TODO THESE SHOULD BE COPIES! 
     if self.optImage is not None:
       self.optImageInUse = True
@@ -54,6 +60,7 @@ class imageExt:
         self.optImageInUse = True
         return self.optImage
       except:
+        self.optImageInUse = False
         return self.coreImage
       
   def setImage(self, image):
@@ -98,7 +105,7 @@ class imageExt:
     
     if self.optImageInUse:
       self.setImage(self.optImage)
-      
+
     self.coreImage.save(filename)
 
 
