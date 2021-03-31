@@ -92,14 +92,14 @@ class imageExt:
       
     self.coreImage.show()
 
-  def save(self):
+  def save(self, filename):
   
     """ Wraps save so that we can keep variuos images sync'd etc"""
     
     if self.optImageInUse:
       self.setImage(self.optImage)
       
-    self.coreImage.save()
+    self.coreImage.save(filename)
 
 
   @classmethod
