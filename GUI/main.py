@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow
 from importlib_resources import files
 from .file_handling import FileDetailsHandler, FileLoader
 from .image_display import ImageHandler
+from .colour_handling import ColourOptionsHandler
 from .types import *
 
 import sys
@@ -17,7 +18,7 @@ class Ui(QMainWindow):
 
   # Fan out actions
   def load_triggered(self, filename):
-    self.imageH.change_image(filename)
+    self.imageH.show_image_from_file(filename)
 
 
 def run_app(args):
@@ -27,6 +28,7 @@ def run_app(args):
   window.fileH = FileDetailsHandler(window)
   window.fileL = FileLoader(window, window.fileH)
   window.imageH = ImageHandler(window)
+  window.colourH = ColourOptionsHandler(window)
 
   cross_connect(window)
 

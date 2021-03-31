@@ -16,9 +16,15 @@ class ImageHandler(qtc.QObject):
     self.image_hook = window.image_hook
 
     
-  def change_image(self, filename):
-  
+  def show_image_from_file(self, filename):
+
     self.full_image = imageExt.imageFromFile(filename)
+    self.change_image(self.full_image)
+  
+  
+  def change_image(self, new_image):
+  
+    self.full_image = new_image
     data = self.full_image.coreImage.tobytes("raw", "RGB")
     sz = self.full_image.coreImage.size
     self.qimage = QImage(data, sz[0], sz[1], QImage.Format_RGB888) 
@@ -32,6 +38,7 @@ class ImageHandler(qtc.QObject):
     self.image_hook.show()
 
     self.image_changed.emit(ImagePayload(im_sz))
+
     
 
   def resize_image(self):
