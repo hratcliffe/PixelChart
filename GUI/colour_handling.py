@@ -1,5 +1,6 @@
 from PyQt5 import uic, QtCore
 from PyQt5.QtWidgets import QApplication, QLabel, QDialog, QFileDialog
+import PyQt5.QtCore as qtc
 from importlib_resources import files
 from copy import deepcopy
 
@@ -7,14 +8,16 @@ from os import path
 import sys
 
 from ColourHandling.detect import mergeColours
-from .types import ColourPayload
+from .types import ImageStatePayload, ImageChangePayload
 
 
 _default_reduce_number = 20
 
-class ColourOptionsHandler():
+class ColourOptionsHandler(qtc.QObject):
+  image_change_request = qtc.pyqtSignal(ImageChangePayload, name="image_change_request")
 
   def __init__(self, window):
+    super(ColourOptionsHandler, self).__init__()
 
     self.window = window
   
@@ -48,7 +51,7 @@ class ColourOptionsHandler():
 
         
 
-#  @QtCore.pyqtSlot(ImagePayload)
+#  @QtCore.pyqtSlot(ImageStatePayload)
   def on_image_changed(self, value):
     self.set_num_colours(value.n_cols)
 

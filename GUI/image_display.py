@@ -4,10 +4,10 @@ import PyQt5.QtCore as qtc
 #import KeepAspectRatio, SmoothTransformation
 
 from ColourHandling import *
-from .types import ImagePayload
+from .types import ImageStatePayload, ImageChangePayload
 
 class ImageHandler(qtc.QObject):
-  image_changed = qtc.pyqtSignal(ImagePayload, name="image_changed")
+  image_changed = qtc.pyqtSignal(ImageStatePayload, name="image_changed")
 
   def __init__(self, window):
     super(ImageHandler, self).__init__()
@@ -38,7 +38,7 @@ class ImageHandler(qtc.QObject):
     self.image_hook.show()
 
     im_cols = len(self.full_image.colourCounts)
-    self.image_changed.emit(ImagePayload(im_sz, im_cols))
+    self.image_changed.emit(ImageStatePayload(im_sz, im_cols))
     
 
   def resize_image(self):

@@ -1,12 +1,14 @@
 from PyQt5 import uic, QtCore
 from PyQt5.QtWidgets import QApplication, QLabel, QDialog, QFileDialog
+import PyQt5.QtCore as qtc
+
 from importlib_resources import files
 from copy import deepcopy
 
 from os import path
 import sys
 
-from .types import ImagePayload
+from .types import ImageStatePayload
 
 class FileLoader():
 
@@ -51,9 +53,10 @@ class FileLoader():
       print(stuff)      
 
 
-class FileDetailsHandler():
+class FileDetailsHandler(qtc.QObject):
 
   def __init__(self, window):
+    super(FileDetailsHandler, self).__init__()
 
     self.extras_dict = {"ColourNumbers":False, "LengthEstimates":False,    "FinalSize":False}
     self.window = window
@@ -90,7 +93,7 @@ class FileDetailsHandler():
     return details
         
 
-#  @QtCore.pyqtSlot(ImagePayload)
+#  @QtCore.pyqtSlot(ImageStatePayload)
   def on_image_changed(self, value):
     self.set_resize_sliders(value.sz.width(), value.sz.height())
 
