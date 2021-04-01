@@ -16,7 +16,7 @@ class Ui(QMainWindow):
     uic.loadUi(self.main_window_file, self) # Load the .ui file
     self.show() # Show the GUI
 
-  # Fan out actions
+  # Fan out actions if needed
   def load_triggered(self, filename):
     self.imageH.show_image_from_file(filename)
 
@@ -41,4 +41,7 @@ def cross_connect(window):
   window.imageH.image_changed.connect(window.colourH.on_image_changed)
   
   window.colourH.image_change_request.connect( window.imageH.on_image_change_request)
+  
+  window.fileL.save_triggered.connect(window.imageH.on_save_triggered)
+
 

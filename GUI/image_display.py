@@ -14,6 +14,7 @@ class ImageHandler(qtc.QObject):
     self.window = window
     self.pane = window.image_pane
     self.image_hook = window.image_hook
+    self.full_image = None
 
     
   def show_image_from_file(self, filename):
@@ -25,7 +26,8 @@ class ImageHandler(qtc.QObject):
   def change_image(self, new_image):
   
     self.full_image = new_image
-    data = self.full_image.coreImage.tobytes("raw", "RGB")
+    tmp_im = self.full_image.getImage(opt=False)
+    data = tmp_im.tobytes("raw", "RGB")
     sz = self.full_image.coreImage.size
     self.qimage = QImage(data, sz[0], sz[1], QImage.Format_RGB888) 
     pixmap = QPixmap.fromImage(self.qimage)
@@ -48,13 +50,31 @@ class ImageHandler(qtc.QObject):
   def modify_image(self, image, change_payload):
     """Modify the given image according to the given ImageChangePayload"""
   
-    new_image = mergeColours(image.coreImage, change_payload.n_cols)
-    # TODO this is pretty clumsy...
-    image.setImage(new_image)
+    reduceColours(image, change_payload.n_cols)    
     self.change_image(image)
     
   #  @QtCore.pyqtSlot(ImageChangePayload)
   def on_image_change_request(self, value):
     self.modify_image(self.full_image, value)
+
+  #  @QtCore.pyqtSlot(str)
+  def on_save_triggered(self, filename):
+    try:
+      self.full_image.save(filename)
+    except:
+      pass
+
+  #  @QtCore.pyqtSlot(PatternPayload)
+  def on_pattern_save_triggered(self, value):
+    print("Not implemented yet")
+    
+    # Create pattern
+    
+    # Create key    
+    
+    # Handle descriptors
+    
+    # Save the lot (pdf?)
+    
     
     

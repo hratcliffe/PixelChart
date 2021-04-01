@@ -8,11 +8,16 @@ from copy import deepcopy
 from os import path
 import sys
 
-from .types import ImageStatePayload
+from .types import ImageStatePayload, PatternPayload
+from .warnings import WarnDialog
 
-class FileLoader():
+class FileLoader(qtc.QObject):
+
+  save_triggered = qtc.pyqtSignal(str, name="save_triggered")
+  pattern_save_triggered = qtc.pyqtSignal(str, name="pattern_save_triggered")
 
   def __init__(self, window, fileH):
+    super(FileLoader, self).__init__()
 
     window.LoadButton.clicked.connect(self.load_file)   
     window.SaveButton.clicked.connect(self.save_file)
@@ -20,6 +25,7 @@ class FileLoader():
  
     self.window = window
     self.details = fileH
+    self.jpg_warning_dismissed = False
 
   def load_file(self):
   
@@ -40,6 +46,20 @@ class FileLoader():
     loader.show()
     if(loader.exec_()):
       filename = loader.selectedFiles()[0]
+      root, ext = path.splitext(filename)
+      new_ext = '.png'
+      if not self.jpg_warning_dismissed and ext == ".jpg":
+        dialog = WarnDialog()
+        dialog.set_message("Warning: jpg format may introduce new colours. Recommend saving as png instead")  
+        dialog.set_options(new_ext, ".jpg")
+        dialog.show()
+        if dialog.exec_():
+          filename = root + new_ext
+      
+        self.jpg_warning_dismissed = dialog.check_dontAskState()
+      
+      self.save_triggered.emit(filename)
+    
 
   def save_pattern(self):
   
@@ -50,7 +70,7 @@ class FileLoader():
     if(loader.exec_()):
       filename = loader.selectedFiles()[0]
       stuff = self.details.get_details()
-      print(stuff)      
+      self.save_triggered.emit(PatternPayload(filename, stuff))
 
 
 class FileDetailsHandler(qtc.QObject):
