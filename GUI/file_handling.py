@@ -14,7 +14,7 @@ from .warnings import WarnDialog
 class FileLoader(qtc.QObject):
 
   save_triggered = qtc.pyqtSignal(str, name="save_triggered")
-  pattern_save_triggered = qtc.pyqtSignal(str, name="pattern_save_triggered")
+  pattern_save_triggered = qtc.pyqtSignal(PatternPayload, name="pattern_save_triggered")
 
   def __init__(self, window, fileH):
     super(FileLoader, self).__init__()
@@ -70,7 +70,7 @@ class FileLoader(qtc.QObject):
     if(loader.exec_()):
       filename = loader.selectedFiles()[0]
       stuff = self.details.get_details()
-      self.save_triggered.emit(PatternPayload(filename, stuff))
+      self.pattern_save_triggered.emit(PatternPayload(filename, stuff))
 
 
 class FileDetailsHandler(qtc.QObject):

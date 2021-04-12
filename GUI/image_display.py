@@ -1,6 +1,10 @@
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtGui import QPixmap, QImage, QPainter
 from PyQt5.QtWidgets import QGraphicsView
+from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 import PyQt5.QtCore as qtc
+from PyQt5.QtCore import QSize
+
+
 #import KeepAspectRatio, SmoothTransformation
 
 from ColourHandling import *
@@ -28,7 +32,7 @@ class ImageHandler(qtc.QObject):
     self.full_image = new_image
     tmp_im = self.full_image.getImage(opt=False)
     data = tmp_im.tobytes("raw", "RGB")
-    sz = self.full_image.coreImage.size
+    sz = tmp_im.size
     self.qimage = QImage(data, sz[0], sz[1], QImage.Format_RGB888) 
     pixmap = QPixmap.fromImage(self.qimage)
     port_sz = self.pane.viewport().size()
@@ -66,9 +70,62 @@ class ImageHandler(qtc.QObject):
 
   #  @QtCore.pyqtSlot(PatternPayload)
   def on_pattern_save_triggered(self, value):
-    print("Not implemented yet")
     
-    # Create pattern
+    filename = value.filename
+    
+    print(filename)
+    
+    printer = QPrinter(QPrinter.HighResolution)
+    printer.setOutputFormat(QPrinter.PdfFormat)
+    printer.setOutputFileName(filename)
+    
+    painter = QPainter()
+    painter.begin(printer)
+    # Colour image
+    
+    rect = painter.viewport()
+    
+    o_sz = rect.size()
+    
+    tmp_im = self.full_image.getImage(opt=False)
+    data = tmp_im.tobytes("raw", "RGB")
+    sz = tmp_im.size
+    sz1 = QSize(sz[0], sz[1])
+
+    tmp_im = self.full_image.getImage(opt=False)
+    data = tmp_im.tobytes("raw", "RGB")
+    sz = tmp_im.size
+    qimage = QImage(data, sz[0], sz[1], QImage.Format_RGB888) 
+    pixmap = QPixmap.fromImage(qimage)
+    
+    sz1.scale(o_sz, qtc.Qt.KeepAspectRatio)
+    sz1=QSize(sz1.width()*0.9, sz1.height()*0.9)
+    rect.setSize(sz1)
+
+    pixmap = pixmap.scaled(sz1.width(), sz1.height(), qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+
+    
+#    o_image = QImage(data, sz[0], sz[1], QImage.Format_RGB888) 
+ #   painter.drawImage(rect, o_image)
+    painter.drawPixmap(rect, pixmap)
+    
+    printer.newPage()
+    # Symbolic image
+    
+    tmp_im = toSymbolicImage(self.full_image).getImage(opt=False)
+    data = tmp_im.tobytes("raw", "RGB")
+    sz = tmp_im.size
+    sz1 = QSize(sz[0], sz[1])
+    
+    sz1.scale(o_sz, qtc.Qt.KeepAspectRatio)
+    sz1=QSize(sz1.width()*0.9, sz1.height()*0.9)
+    rect.setSize(sz1)
+    
+    o_image = QImage(data, sz[0], sz[1], QImage.Format_RGB888) 
+    painter.drawImage(rect, o_image)
+    
+    printer.newPage()
+
     
     # Create key    
     
@@ -77,4 +134,4 @@ class ImageHandler(qtc.QObject):
     # Save the lot (pdf?)
     
     
-    
+    painter.end()
