@@ -1,6 +1,6 @@
 from . import imageExt
 from .detect import mergeColours
-from .replace import replaceColours, addGuide
+from .replace import replaceColours, addGuide, makeKeyItems
 from .symbols import getUpscaling
 
 
@@ -31,4 +31,13 @@ def toSymbolicImage(image, guides=None):
       addGuide(new_image.coreImage, guide[0]*scale, guide[1], guide[2])
   
   return new_image
+
+def getKey(image):
+
+  bg_col = image.getColourWithMode((255,255,255))
+  fg_col = image.getColourWithMode((0,0,0))
+
+  key = makeKeyItems(image.colourMap[0], bg_col, fg_col, mode=image.coreImage.mode)
+  
+  return key
 
