@@ -53,6 +53,15 @@ def replaceColours(originalImage, colourToSymbolMap, colour1, colour2 ):
         
   return imNew
 
+def drawSymbolInPlace(image, symId, colour1, colour2 ):
+  """Draw a single symbol in top-left of given image"""
+
+  symbols.loadSymbols()
+  pixels = image.load()
+
+  symbol = symbols.getSymbol(symId)
+  for loc in symbol.locs:
+    pixels[loc[0]+1, loc[1]+1] = colour2
 
 def addGuide(imageIn, spacing, style, colour):
   """ Add a SINGLE set of guide lines with defined spacing, style and colour
@@ -106,3 +115,19 @@ def addGuide(imageIn, spacing, style, colour):
           rev_colour = rev_colour + (colour[k],)
         image[i, j] = rev_colour
 
+def makeKeyItems(colourToSymbolMap, bg_col, fg_col, mode='RGB'):
+  # Create small images and symbol pictures for each key element
+  els = []
+  
+  scale_sz = symbols.getUpscaling()
+  blob_sz = (scale_sz, scale_sz)
+
+  for key in colourToSymbolMap:
+    
+    cIm = Image.new(mode, blob_sz, key)
+    sIm = Image.new(mode, blob_sz, bg_col)
+    drawSymbolInPlace(sIm, colourToSymbolMap[key], bg_col, fg_col)
+
+    els.append([key, colourToSymbolMap[key], cIm, sIm])
+
+  return els
