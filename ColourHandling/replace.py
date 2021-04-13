@@ -1,5 +1,6 @@
 from . import symbols
-from PIL import Image
+from PIL import Image, ImageCms
+
 
 def mapColours(colours):
   """ Create maps between colours and IDs. IDs can then be mapped to symbols"""
@@ -141,3 +142,40 @@ def makeKeyItems(colourToSymbolMap, bg_col, fg_col, mode='RGB'):
   
 
   return els
+  
+def makeDummy(colourMap):
+
+  width=len(colourMap)
+  dummy = Image.new('RGB', (width, 1), (255, 255, 255))
+  
+  pix = dummy.load()
+  cnt = 0
+  for item in colourMap:
+    print(item, cnt)
+    pix[cnt, 0] = item
+    cnt = cnt+1
+    
+  return changeModeGeneric(dummy, "RGB", "LAB")
+    
+def changeModeGeneric(image, init, final):
+
+  # TODO find a saner way to make these changes
+  # Note : "["LAB", "XYZ", "sRGB"]" are available colour spaces"
+  
+  if init == "RGB":
+    init_profile = ImageCms.createProfile("sRGB")
+  else:
+    init_profile = ImageCms.createProfile(init)
+
+  if final == "RGB":
+    final_profile = ImageCms.createProfile("sRGB")
+  else:
+    final_profile  = ImageCms.createProfile(final)
+
+  # TODO stash transforms? How much do we use them?
+  transform = ImageCms.buildTransformFromOpenProfiles(init_profile, final_profile, init, final)
+
+  return ImageCms.applyTransform(image, transform)
+
+
+  

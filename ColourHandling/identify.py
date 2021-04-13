@@ -1,19 +1,106 @@
-
+from math import sqrt, atan2, pi
 
 def nameColour(colourTriplet, mode = 'RGB'):
 
   if mode in ['RGB', 'rgb']:
     return nameColourRGB(colourTriplet)
   elif mode in ['lab', "LAB", 'Lab']:
-    return nameColourLab(colourTriplet)
+    return nameColourLAB(colourTriplet)
   else:
     return None
 
+def nameColourLAB(colourTriplet):
+
+  l, a, b = colourTriplet
+  # a- red-green. b- blue-yellow 
+  
+  r = sqrt((a-128)**2 + (b-128)**2)
+  theta = atan2((128-b),(a-128)) + pi
+  
+  #Handle central balanced region specially
+  if r < 10:
+    # Generally balanced greys
+    
+    if l > 220:
+      return "white"
+    elif l > 180:
+      return "l. grey"
+    elif l > 120:
+      return "grey"
+    elif l > 50:
+      return "d. grey"
+    else:
+      return "black"
+
+  if l > 220:
+    name = "vl. "
+  elif l > 180:
+    name = "l. "
+  elif l > 120:
+    name = ""
+  elif l > 50:
+    name = "d. "
+  else:
+    name = "vd. "
+
+  # Work in 8 regions of angle, with tweaks to bounds
+  
+  print(a, b, r, theta, pi/8, 3*pi/8)
+  if theta > 0 and theta < 3*pi/16:
+    name = name + "green"
+  elif theta < 7*pi/16:
+    name = name + "lime"
+  elif theta < 10*pi/16:
+    name = name + "yellow"
+  elif theta < 12*pi/16:
+    name = name + "orange"
+  elif theta < 17*pi/16:
+    name = name + "red"
+  elif theta < 21*pi/16:
+    name = name + "purple"
+  elif theta < 27*pi/16:
+    name = name + "blue"
+  elif theta < 29*pi/8:
+    name = name + "cyan"
+  else:
+    name = name + "green"
+
+
+  # Amend a few special names 
+  
+  if name == "d. yellow" or name == "d. orange":
+    name = "brown"
+  elif name == "vd. yellow" or name == "vd. orange":
+    name = "d. brown"
+  elif name == "l. red" or name == "l. orange":
+    name = "pink"
+  elif name == "vl. red" or name == "vl. orange":
+    name = "l. pink"
+    
+  # Amend brightnesses for those removed
+  if "yellow" in name:
+    if name == "yellow":
+      name = "d. " + name
+    elif name == "l. yellow":
+      name = "yellow"
+    elif name == "vl. yellow":
+      name = "l. yellow"
+
+  if "orange" in name:
+    if name == "orange":
+      name = "dark " + name
+    elif name == "l. orange":
+      name = "orange"
+    elif name == "vl. orange":
+      name = "l. orange"
+    
+
+  return name
 
 def nameColourRGB(colourTriplet):
-  """ Really dumb colour naming. Find channel dominance and darkness """
-  
-  # Neutrals
+  # Bad heuristic colour naming. Use LAB if possible!
+
+  # Identify dominances
   rg = colourTriplet[0] - colourTriplet[1]
   rb = colourTriplet[0] - colourTriplet[2]
   gb = colourTriplet[1] - colourTriplet[2]
@@ -22,15 +109,19 @@ def nameColourRGB(colourTriplet):
  
   name = ""
  
-  # Balanced channels 
+  # Balanced channels - divide black/white/grey from brightnesses
   bal = 40
   if abs(rg) < bal and abs(rb) < bal and abs(gb) < bal:
     # Some sort of grey
     
-    if bright > 700:
+    if bright > 750:
       return "white"
-    elif bright > 200:
+    elif bright > 500:
+      return "light grey"
+    elif bright > 300:
       return "grey"
+    elif bright > 100:
+      return "dark grey"
     else:
       return "black"
 
@@ -40,18 +131,18 @@ def nameColourRGB(colourTriplet):
   elif bright < 300:
     name = "dark "
   
-  dom = 0.6 * bright
+  dom = 0.75 * bright
   bal = 40
   # One channel dominance
-  if rg > bal or rb > bal or colourTriplet[0] > dom:
+  if (rg > bal and rb > bal) or colourTriplet[0] > dom:
     # Red is "most" of brightness
     name += "red"
     return name
-  elif -rg > bal or gb > bal or colourTriplet[1] > dom:
+  elif (-rg > bal and gb > bal) or colourTriplet[1] > dom:
     # Green is "most" of brightness
     name += "green"
     return name
-  elif -rb > bal or -gb > bal or colourTriplet[2] > dom:
+  elif (-rb > bal and -gb > bal) or colourTriplet[2] > dom:
     # Blue is "most" of brightness
     name += "blue"
     return name
@@ -83,5 +174,5 @@ def nameColourRGB(colourTriplet):
     return name
 
   return None
-    
-  
+
+
