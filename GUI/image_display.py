@@ -1,9 +1,9 @@
 from PyQt5.QtGui import QPixmap, QImage, QPainter
-from PyQt5.QtWidgets import QGraphicsView
+from PyQt5.QtWidgets import QGraphicsView, QGridLayout, QLabel
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 import PyQt5.QtCore as qtc
 from PyQt5.QtCore import QSize
-
+from PIL import ImageQt
 
 #import KeepAspectRatio, SmoothTransformation
 
@@ -18,23 +18,22 @@ class ImageHandler(qtc.QObject):
     self.window = window
     self.pane = window.image_pane
     self.image_hook = window.image_hook
+    self.key_pane = window.key_box
     self.full_image = None
+    self.key_layout = None
 
     
   def show_image_from_file(self, filename):
 
     self.full_image = imageExt.imageFromFile(filename)
-    self.change_image(self.full_image)
-  
+    self.change_image(self.full_image)  
   
   def change_image(self, new_image):
   
     self.full_image = new_image
     tmp_im = self.full_image.getImage(opt=False)
-    data = tmp_im.tobytes("raw", "RGB")
     sz = tmp_im.size
-    self.qimage = QImage(data, sz[0], sz[1], QImage.Format_RGB888) 
-    pixmap = QPixmap.fromImage(self.qimage)
+    pixmap = tmp_im.toqpixmap()
     port_sz = self.pane.viewport().size()
     im_sz = qtc.QSize(sz[0], sz[1])
     im_sz.scale(port_sz, qtc.Qt.KeepAspectRatio)
@@ -44,8 +43,43 @@ class ImageHandler(qtc.QObject):
     self.image_hook.show()
 
     im_cols = len(self.full_image.colourCounts)
+    self.show_key()
     self.image_changed.emit(ImageStatePayload(im_sz, im_cols))
     
+
+  def show_key(self):
+
+    key = getKey(self.full_image)
+
+    print(key)
+    
+    if self.key_layout is not None:
+      clearLayout(self.key_layout)    
+    
+    else:
+      self.key_layout = QGridLayout()
+      self.key_pane.setLayout(self.key_layout)
+      self.key_layout.setRowStretch(1, 0)
+    
+    cnt = 0
+    for item in key:
+      keyItem = QLabel(str(item[1]+1))
+
+      badgeMap = item[2].toqpixmap()
+      badgeMap = badgeMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+      keyBadge = QLabel()
+      keyBadge.setPixmap(badgeMap)
+      keyBadge.adjustSize()
+
+      self.key_layout.addWidget(keyItem, cnt, 0)
+      self.key_layout.addWidget(keyBadge, cnt, 1)
+      cnt = cnt + 1
+      # Limit to showing 20 items
+      if cnt > 20: 
+        keyItem = QLabel("...")
+        self.key_layout.addWidget(keyItem, cnt, 0)
+        break
+
 
   def resize_image(self):
     pass
@@ -56,6 +90,8 @@ class ImageHandler(qtc.QObject):
   
     reduceColours(image, change_payload.n_cols)    
     self.change_image(image)
+    self.show_key()
+
     
   #  @QtCore.pyqtSlot(ImageChangePayload)
   def on_image_change_request(self, value):
@@ -135,3 +171,11 @@ class ImageHandler(qtc.QObject):
     
     
     painter.end()
+    
+    
+def clearLayout(layout):
+  # From https://stackoverflow.com/questions/4528347/clear-all-widgets-in-a-layout-in-pyqt  or https://stackoverflow.com/a/10067548
+  while layout.count():
+    child = layout.takeAt(0)
+    if child.widget():
+      child.widget().deleteLater()
