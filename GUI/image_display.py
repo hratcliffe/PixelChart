@@ -1,4 +1,4 @@
-from PyQt5.QtGui import QPixmap, QImage, QPainter
+from PyQt5.QtGui import QPixmap, QImage, QPainter, QFont
 from PyQt5.QtWidgets import QGraphicsView, QGridLayout, QLabel
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 import PyQt5.QtCore as qtc
@@ -63,8 +63,10 @@ class ImageHandler(qtc.QObject):
     
     cnt = 0
     for item in key:
-      keyItem = QLabel(str(item[1]+1))
-
+      colourName = item[4]
+      keyItem = QLabel(colourName)
+      keyItem.setFont(QFont("Arial", 10))
+      
       badgeMap = item[2].toqpixmap()
       badgeMap = badgeMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
       keyBadge = QLabel()
