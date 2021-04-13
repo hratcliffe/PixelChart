@@ -196,8 +196,8 @@ def findColours(pixels, sz):
 
   colours = set()
 
-  for i in range(sz[0]):
-    for j in range(sz[1]):
+  for i in range(sz[0]-1):
+    for j in range(sz[1]-1):
       colours.add(pixels[i,j])
 
   return colours

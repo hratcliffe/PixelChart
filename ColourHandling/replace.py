@@ -117,11 +117,16 @@ def addGuide(imageIn, spacing, style, colour):
 
 def makeKeyItems(colourToSymbolMap, bg_col, fg_col, mode='RGB'):
   # Create small images and symbol pictures for each key element
+
+  # Limit items for sanity! 100 only
+  limit_num = 100
+
   els = []
   
   scale_sz = symbols.getUpscaling()
   blob_sz = (scale_sz, scale_sz)
 
+  cnt = 0
   for key in colourToSymbolMap:
     
     cIm = Image.new(mode, blob_sz, key)
@@ -129,5 +134,10 @@ def makeKeyItems(colourToSymbolMap, bg_col, fg_col, mode='RGB'):
     drawSymbolInPlace(sIm, colourToSymbolMap[key], bg_col, fg_col)
 
     els.append([key, colourToSymbolMap[key], cIm, sIm])
+
+    cnt = cnt + 1
+    if cnt > limit_num:
+      break
+  
 
   return els
