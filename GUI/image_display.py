@@ -51,8 +51,6 @@ class ImageHandler(qtc.QObject):
 
     key = getKey(self.full_image)
 
-    print(key)
-    
     if self.key_layout is not None:
       clearLayout(self.key_layout)    
     
@@ -82,22 +80,27 @@ class ImageHandler(qtc.QObject):
         self.key_layout.addWidget(keyItem, cnt, 0)
         break
 
-
-  def resize_image(self):
-    pass
-    
-
   def modify_image(self, image, change_payload):
     """Modify the given image according to the given ImageChangePayload"""
   
     reduceColours(image, change_payload.n_cols)    
     self.change_image(image)
-    self.show_key()
 
+  def resize_image(self, image, resize_payload):
+    """Modify the given image according to the given ImageResizePayload"""
+    
+    resizeImage(image, resize_payload.width, resize_payload.height)
+    print(image.coreImage.size)
+    self.change_image(image)
     
   #  @QtCore.pyqtSlot(ImageChangePayload)
   def on_image_change_request(self, value):
     self.modify_image(self.full_image, value)
+
+  #  @QtCore.pyqtSlot(ImageResizePayload)
+  def on_image_resize_request(self, value):
+    self.resize_image(self.full_image, value)
+
 
   #  @QtCore.pyqtSlot(str)
   def on_save_triggered(self, filename):

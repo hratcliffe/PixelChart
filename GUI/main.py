@@ -41,7 +41,9 @@ def cross_connect(window):
   window.imageH.image_changed.connect(window.colourH.on_image_changed)
   
   window.colourH.image_change_request.connect( window.imageH.on_image_change_request)
-  
+
+  window.fileH.image_resize_request.connect( window.imageH.on_image_resize_request)
+
   window.fileL.save_triggered.connect(window.imageH.on_save_triggered)
   window.fileL.pattern_save_triggered.connect(window.imageH.on_pattern_save_triggered)
 

@@ -13,3 +13,9 @@ class PatternPayload():
   def __init__(self, filename, details):
     self.filename = filename
     self.details = details
+
+class ImageSizePayload():
+  def __init__(self, wid, ht):
+    self.width = wid
+    self.height = ht
+

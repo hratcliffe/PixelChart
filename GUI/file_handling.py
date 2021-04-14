@@ -8,7 +8,7 @@ from copy import deepcopy
 from os import path
 import sys
 
-from .types import ImageStatePayload, PatternPayload
+from .types import ImageStatePayload, PatternPayload, ImageSizePayload
 from .warnings import WarnDialog
 
 class FileLoader(qtc.QObject):
@@ -75,6 +75,8 @@ class FileLoader(qtc.QObject):
 
 class FileDetailsHandler(qtc.QObject):
 
+  image_resize_request = qtc.pyqtSignal(ImageSizePayload, name="image_resize_request")
+
   def __init__(self, window):
     super(FileDetailsHandler, self).__init__()
 
@@ -87,10 +89,20 @@ class FileDetailsHandler(qtc.QObject):
     self.extras_button = window.extras_button
     self.extras_button.clicked.connect(self.extras_button_clicked) 
 
+    self.resize_button = window.resize_button
+    self.resize_button.clicked.connect(self.resize_button_clicked) 
+    self.ht_adj_slider = window.ht_adj_slider
+    self.wid_adj_slider = window.wid_adj_slider
+
   def extras_button_clicked(self):
     extrasDialog = FileExtras(self.extras_dict)
     extrasDialog.exec_()
     self.extras_dict = extrasDialog.get_selections()
+
+  def resize_button_clicked(self):
+    width = self.wid_adj_slider.value()
+    ht = self.ht_adj_slider.value()
+    self.image_resize_request.emit(ImageSizePayload(width, ht))
 
   def fill_filename(self, name):
     short_name = path.basename(name)
