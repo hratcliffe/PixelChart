@@ -44,9 +44,11 @@ class ImageHandler(qtc.QObject):
 
     im_cols = len(self.full_image.colourCounts)
     self.show_key()
-    self.image_changed.emit(ImageStatePayload(im_sz, im_cols))
-    
 
+    # Make sure this is backing image size, NOT pixmap size
+    b_im_sz = qtc.QSize(sz[0], sz[1])
+    self.image_changed.emit(ImageStatePayload(b_im_sz, im_cols))
+    
   def show_key(self):
 
     key = getKey(self.full_image)
@@ -90,7 +92,6 @@ class ImageHandler(qtc.QObject):
     """Modify the given image according to the given ImageResizePayload"""
     
     resizeImage(image, resize_payload.width, resize_payload.height)
-    print(image.coreImage.size)
     self.change_image(image)
     
   #  @QtCore.pyqtSlot(ImageChangePayload)
