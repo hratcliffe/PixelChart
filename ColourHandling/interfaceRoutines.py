@@ -11,6 +11,11 @@ def reduceColours(image, n_cols, opt=False):
   image.setImage(new_image)
 
 
+def resizeImage(image, width, height):
+
+  image.resize(width, height)
+
+
 def toSymbolicImage(image, guides=None):
 
   # Guides specified as (spacing, style, colour) tuples or lists

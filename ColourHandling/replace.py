@@ -151,7 +151,6 @@ def makeDummy(colourMap):
   pix = dummy.load()
   cnt = 0
   for item in colourMap:
-    print(item, cnt)
     pix[cnt, 0] = item
     cnt = cnt+1
     
