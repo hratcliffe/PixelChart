@@ -22,6 +22,13 @@ class imageExt:
     self.colourCounts = counts
     self.optImage = None
     self.optImageInUse = False
+
+  def resize(self, width, height):
+  
+    
+    new_image = self.coreImage.resize((width, height), Image.ANTIALIAS)
+    self.setImage(new_image)
+
     
   def getColourWithMode(self, colourTriplet):
     """Change from given colour into correct form for mode of this image"""
