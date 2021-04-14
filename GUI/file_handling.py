@@ -91,8 +91,11 @@ class FileDetailsHandler(qtc.QObject):
 
     self.resize_button = window.resize_button
     self.resize_button.clicked.connect(self.resize_button_clicked) 
+
     self.ht_adj_slider = window.ht_adj_slider
     self.wid_adj_slider = window.wid_adj_slider
+    self.wid_adj_slider.valueChanged.connect(self.wid_slider_changed)
+    self.ht_adj_slider.valueChanged.connect(self.ht_slider_changed)
 
   def extras_button_clicked(self):
     extrasDialog = FileExtras(self.extras_dict)
@@ -104,6 +107,12 @@ class FileDetailsHandler(qtc.QObject):
     ht = self.ht_adj_slider.value()
     self.image_resize_request.emit(ImageSizePayload(width, ht))
 
+  def wid_slider_changed(self):
+    self.set_resize_slider_labels(wid=self.wid_adj_slider.value())
+
+  def ht_slider_changed(self):
+    self.set_resize_slider_labels(ht=self.ht_adj_slider.value())
+
   def fill_filename(self, name):
     short_name = path.basename(name)
     self.window.filename_show.setText(short_name)
@@ -112,8 +121,13 @@ class FileDetailsHandler(qtc.QObject):
   def set_resize_sliders(self, wid, ht):
     self.window.wid_adj_slider.setValue(wid)
     self.window.ht_adj_slider.setValue(ht)
-    self.window.wid_label.setText(str(wid))
-    self.window.ht_label.setText(str(ht))
+    
+  def set_resize_slider_labels(self, wid=None, ht=None):
+
+    if wid:
+      self.window.wid_label.setText(str(wid))
+    if ht:
+      self.window.ht_label.setText(str(ht))
 
   def get_details(self):
     details = deepcopy(self.extras_dict)
