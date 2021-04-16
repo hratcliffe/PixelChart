@@ -9,6 +9,7 @@ from PIL import ImageQt
 
 from ColourHandling import *
 from .types import ImageStatePayload, ImageChangePayload
+from .warnings import PresaveDialog
 
 class ImageHandler(qtc.QObject):
   image_changed = qtc.pyqtSignal(ImageStatePayload, name="image_changed")
@@ -21,6 +22,7 @@ class ImageHandler(qtc.QObject):
     self.key_pane = window.key_box
     self.full_image = None
     self.key_layout = None
+    self.key = None
 
     
   def show_image_from_file(self, filename):
@@ -31,6 +33,7 @@ class ImageHandler(qtc.QObject):
   def change_image(self, new_image):
   
     self.full_image = new_image
+
     tmp_im = self.full_image.getImage(opt=False)
     sz = tmp_im.size
     pixmap = tmp_im.toqpixmap()
@@ -43,15 +46,17 @@ class ImageHandler(qtc.QObject):
     self.image_hook.show()
 
     im_cols = len(self.full_image.colourCounts)
-    self.show_key()
+    self.show_key(True)
 
     # Make sure this is backing image size, NOT pixmap size
     b_im_sz = qtc.QSize(sz[0], sz[1])
     self.image_changed.emit(ImageStatePayload(b_im_sz, im_cols))
     
-  def show_key(self):
+  def show_key(self, changed = False):
 
-    key = getKey(self.full_image)
+    # Get new key
+    if changed:
+      self.key = getKey(self.full_image)
 
     if self.key_layout is not None:
       clearLayout(self.key_layout)    
@@ -62,7 +67,7 @@ class ImageHandler(qtc.QObject):
       self.key_layout.setRowStretch(1, 0)
     
     cnt = 0
-    for item in key:
+    for item in self.key:
       colourName = item[4]
       keyItem = QLabel(colourName)
       keyItem.setFont(QFont("Arial", 10))
@@ -93,6 +98,35 @@ class ImageHandler(qtc.QObject):
     
     resizeImage(image, resize_payload.width, resize_payload.height)
     self.change_image(image)
+
+  def pattern_checks(self):
+    # Show pattern details and verify anything "suspicious"
+    
+    # Use constants so we can make these configurable later
+    max_sz = (200, 200)
+    max_colours = 50
+        
+    warnings = []
+
+    im_sz = self.full_image.getImage(opt=False).size
+    if im_sz[0] > max_sz[0] or im_sz[1] > max_sz[1]:
+      warnings.append("Image size is very large ({} x {})".format(im_sz[0], im_sz[1]))
+
+    im_cols = len(self.full_image.colourCounts)
+    if im_cols > max_colours:
+      warnings.append("Number of colours is very large ({}). Symbolic pattern will have repeats!".format(im_cols))
+      
+    setts = []
+
+    
+    checkDialog = PresaveDialog()
+    checkDialog.fill_warnings(warnings)
+    checkDialog.fill_settings(setts)
+    checkDialog.show()
+
+    return checkDialog.exec_() 
+
+
     
   #  @QtCore.pyqtSlot(ImageChangePayload)
   def on_image_change_request(self, value):
@@ -112,6 +146,10 @@ class ImageHandler(qtc.QObject):
 
   #  @QtCore.pyqtSlot(PatternPayload)
   def on_pattern_save_triggered(self, value):
+    
+    cont = self.pattern_checks()
+    if not cont:
+      return
     
     filename = value.filename
     

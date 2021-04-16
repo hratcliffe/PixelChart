@@ -1,5 +1,5 @@
 from PyQt5 import uic
-from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel
 from importlib_resources import files
 
 import re
@@ -30,4 +30,31 @@ def _subs(text, sub):
   
   return ''.join(new_str)
   
-  
+
+class PresaveDialog(QDialog):
+  dialog_file = files('GUI').joinpath('PresaveDialog.ui')
+
+  def __init__(self):
+    super(PresaveDialog, self).__init__() # Call the inherited classes __init__ method
+    uic.loadUi(self.dialog_file, self) # Load the .ui file
+        
+  def fill_warnings(self, warnings_list):
+    
+    self.warn_layout = QVBoxLayout()
+    self.warningsGroup.setLayout(self.warn_layout)
+
+    for item in warnings_list:
+      txt = QLabel(item)
+      self.warn_layout.addWidget(txt)
+
+  def fill_settings(self, settings_list):
+    
+    self.set_layout = QVBoxLayout()
+    self.settingsGroup.setLayout(self.set_layout)
+
+    for item in settings_list:
+      txt = QLabel(item)
+      self.set_layout.addWidget(txt)
+    
+    
+    
