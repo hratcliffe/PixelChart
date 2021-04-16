@@ -1,5 +1,5 @@
-from PyQt5.QtGui import QPixmap, QImage, QPainter, QFont
-from PyQt5.QtWidgets import QGraphicsView, QGridLayout, QLabel
+from PyQt5.QtGui import QPixmap, QImage, QPainter, QFont, QIcon
+from PyQt5.QtWidgets import QGraphicsView, QGridLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 import PyQt5.QtCore as qtc
 from PyQt5.QtCore import QSize
@@ -206,15 +206,65 @@ class ImageHandler(qtc.QObject):
     
     printer.newPage()
 
-    
+    rect = painter.viewport()
+
     # Create key    
+    # Use self.key which was filled last time image was changed
     
+    tbl = QTableWidget()
+    row = 0
+    col = 0
+    tbl.setColumnCount(15)
+    tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+#    tbl.horizontalHeader().setStretchLastSection(True)
+
+    tbl.horizontalHeader().hide()
+    tbl.verticalHeader().hide()
+
+    for item in self.key:
+      tbl.setRowCount(row+1)
+      
+      tbl.setItem(row, col, QTableWidgetItem(item[4]))
+      col = col + 1
+
+      badgeMap = item[2].toqpixmap()
+      badgeMap = badgeMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+      tbl.setItem(row, col, QTableWidgetItem())
+      widg = tbl.item(row, col)
+      widg.setIcon(QIcon(badgeMap))
+
+      col = col + 1
+
+      symMap = item[3].toqpixmap()
+      symMap = symMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+      tbl.setItem(row, col, QTableWidgetItem())
+      widg = tbl.item(row, col)
+      widg.setIcon(QIcon(symMap))
+      col = col + 1
+
+      # Spare column between
+      col = col + 1
+
+      if col > 14:
+        col = 0
+        row = row + 1
+
+    
+    tbl_sz = tbl.size()
+    print(tbl_sz, rect)
+    
+    tbl.setMaximumSize(tbl_sz)
+    tbl.setMinimumSize(tbl_sz)
+    
+    out_scale = min(rect.width()/tbl_sz.width(), rect.height()/tbl_sz.height())*0.95
+    print(out_scale)
+    painter.scale(out_scale, out_scale)
+    tbl.render(painter)
     # Handle descriptors
-    
-    # Save the lot (pdf?)
-    
+
     
     painter.end()
+    print("Pattern Complete")
     
     
 def clearLayout(layout):
