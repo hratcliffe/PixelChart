@@ -34,11 +34,11 @@ def replaceColours(originalImage, colourToSymbolMap, colour1, colour2 ):
 
   for i in range(sz[0]):
     for j in range(sz[1]):
-      symId = colourToSymbolMap[originalImage.getpixel((i,j))]
+      try:
+        symId = colourToSymbolMap[originalImage.getpixel((i,j))]
+      except:
+        symId = -1
       symbol = symbols.getSymbol(symId)
-#      for k in range(scale):
-#        pixels[i*scale, j*scale + k] = colour2
-#        pixels[i*scale+k, j*scale] = colour2
       
       for loc in symbol.locs:
         pixels[i*scale + loc[0]+1, j*scale + loc[1]+1] = colour2
@@ -54,15 +54,28 @@ def replaceColours(originalImage, colourToSymbolMap, colour1, colour2 ):
         
   return imNew
 
-def drawSymbolInPlace(image, symId, colour1, colour2 ):
-  """Draw a single symbol in top-left of given image"""
+def drawSymbolInPlace(image, symId, colour1, colour2, outline=False):
+  """Draw a single symbol in top-left of given image. Fails if image given is too small for symbol"""
 
-  symbols.loadSymbols()
+  # TODO protect from undersize image
+
   pixels = image.load()
 
   symbol = symbols.getSymbol(symId)
   for loc in symbol.locs:
     pixels[loc[0]+1, loc[1]+1] = colour2
+
+  if outline:
+    # Enclosing box
+    new_sz = image.size
+    for i in range(new_sz[0]):
+      pixels[i, 0] = colour2
+      pixels[i, new_sz[1]-1] = colour2
+    for j in range(new_sz[1]):
+      pixels[0, j] = colour2
+      pixels[new_sz[0]-1, j] = colour2
+
+
 
 def addGuide(imageIn, spacing, style, colour):
   """ Add a SINGLE set of guide lines with defined spacing, style and colour
@@ -116,7 +129,7 @@ def addGuide(imageIn, spacing, style, colour):
           rev_colour = rev_colour + (colour[k],)
         image[i, j] = rev_colour
 
-def makeKeyItems(colourToSymbolMap, bg_col, fg_col, mode='RGB'):
+def makeKeyItems(colourToSymbolMap, bg_col, fg_col, mode='RGB', outline=True):
   # Create small images and symbol pictures for each key element
 
   # Limit items for sanity! 100 only
@@ -125,14 +138,14 @@ def makeKeyItems(colourToSymbolMap, bg_col, fg_col, mode='RGB'):
   els = []
   
   scale_sz = symbols.getUpscaling()
-  blob_sz = (scale_sz, scale_sz)
+  blob_sz = (scale_sz+1, scale_sz+1)
 
   cnt = 0
   for key in colourToSymbolMap:
     
     cIm = Image.new(mode, blob_sz, key)
     sIm = Image.new(mode, blob_sz, bg_col)
-    drawSymbolInPlace(sIm, colourToSymbolMap[key], bg_col, fg_col)
+    drawSymbolInPlace(sIm, colourToSymbolMap[key], bg_col, fg_col, outline=outline)
 
     els.append([key, colourToSymbolMap[key], cIm, sIm])
 

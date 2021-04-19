@@ -5,7 +5,7 @@
 _symSize = 9
 _edgSize = 1
 
-_symbols = []
+_symbols = None
 
 from os import linesep
 
@@ -75,14 +75,17 @@ def getUpscaling():
   global _symSize, _edgSize
   return _symSize + _edgSize
 
-def loadSymbols():
+def loadSymbols(force = False):
 
   # TODO Only load if not already??
   global _symbols
   
-  _symbols = readSymbols()
+  if force or _symbols is None:
+    _symbols = readSymbols()
   
 def getSymbol(id):
+
+  loadSymbols()
 
   if id < len(_symbols):
     return _symbols[id]
