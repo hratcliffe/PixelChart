@@ -99,7 +99,7 @@ class ImageHandler(qtc.QObject):
     resizeImage(image, resize_payload.width, resize_payload.height)
     self.change_image(image)
 
-  def pattern_checks(self):
+  def pattern_checks(self, details):
     # Show pattern details and verify anything "suspicious"
     
     # Use constants so we can make these configurable later
@@ -118,15 +118,34 @@ class ImageHandler(qtc.QObject):
       
     setts = []
 
+    if details["Symbols"]:
+      setts.append("Producing Symbolic Chart")
+    if details["Key"]:
+      setts.append("Producing Colour Key")
+    if details["RGBCodes"] or details["ColourNumbers"]:
+      tmp = "Producing Colour Ids: "
+      if details["RGBCodes"]:
+        tmp = tmp + "RGB codes "
+      if details["ColourNumbers"]:
+        tmp = tmp + "DMC Colour Approxes "
+      setts.append(tmp)
+    if details["FinalSize"]:
+      setts.append("Producing Final Size at Gauge {}").format(details["Gauge"])
+    if details["LengthEstimates"]:
+      setts.append("Producing Thread Length Estimates at Gauge {}").format(details["Gauge"])
     
+    if not setts:
+      setts.append("No Settings To Report")
+
+    if not warnings:
+      warnings.append("No Warnings To Report")
+
     checkDialog = PresaveDialog()
     checkDialog.fill_warnings(warnings)
     checkDialog.fill_settings(setts)
     checkDialog.show()
 
     return checkDialog.exec_() 
-
-
     
   #  @QtCore.pyqtSlot(ImageChangePayload)
   def on_image_change_request(self, value):
@@ -147,7 +166,7 @@ class ImageHandler(qtc.QObject):
   #  @QtCore.pyqtSlot(PatternPayload)
   def on_pattern_save_triggered(self, value):
     
-    cont = self.pattern_checks()
+    cont = self.pattern_checks(value.details)
     if not cont:
       return
     
