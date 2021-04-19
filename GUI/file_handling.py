@@ -80,7 +80,7 @@ class FileDetailsHandler(qtc.QObject):
   def __init__(self, window):
     super(FileDetailsHandler, self).__init__()
 
-    self.extras_dict = {"ColourNumbers":False, "LengthEstimates":False,    "FinalSize":False}
+    self.extras_dict = {"RGBCodes":False, "ColourNumbers":False, "LengthEstimates":False,    "FinalSize":False}
     self.window = window
   
     fill_file_combos(window)
@@ -152,6 +152,11 @@ class FileExtras(QDialog):
     uic.loadUi(self.dialog_file, self) # Load the .ui file
     
     try:
+      if selections["RGBCodes"]:
+        self.rgb_check.setChecked(True) 
+    except:
+      pass
+    try:
       if selections["ColourNumbers"]:
         self.colour_check.setChecked(True) 
     except:
@@ -172,6 +177,7 @@ class FileExtras(QDialog):
   def get_selections(self):
     
     select = {}
+    select["RGBCodes"] = self.rgb_check.isChecked()    
     select["ColourNumbers"] = self.colour_check.isChecked()    
     select["LengthEstimates"] = self.length_check.isChecked()    
     select["FinalSize"] = self.size_check.isChecked()    

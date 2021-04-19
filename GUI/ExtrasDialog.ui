@@ -15,6 +15,13 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QCheckBox" name="rgb_check">
+     <property name="text">
+      <string>RGB Codes</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QCheckBox" name="colour_check">
      <property name="text">
       <string>Colour Numbers</string>
