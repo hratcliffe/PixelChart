@@ -68,7 +68,7 @@ class ImageHandler(qtc.QObject):
     
     cnt = 0
     for item in self.key:
-      colourName = item[4]
+      colourName = " ".join(item[4])
       keyItem = QLabel(colourName)
       keyItem.setFont(QFont("Arial", 10))
       
@@ -224,7 +224,7 @@ class ImageHandler(qtc.QObject):
     for item in self.key:
       tbl.setRowCount(row+1)
       
-      tbl.setItem(row, col, QTableWidgetItem(item[4]))
+      tbl.setItem(row, col, QTableWidgetItem(" ".join(item[4])))
       col = col + 1
 
       badgeMap = item[2].toqpixmap()
