@@ -33,14 +33,15 @@ class ImageHandler(qtc.QObject):
   def change_image(self, new_image):
   
     self.full_image = new_image
-
-    tmp_im = self.full_image.getImage(opt=False)
-    sz = tmp_im.size
-    pixmap = tmp_im.toqpixmap()
+    
+    pixmap = self.full_image.getImage(opt=False).toqpixmap()
+    sz = pixmap.size()
+    sz_b = pixmap.size()
     port_sz = self.pane.viewport().size()
-    im_sz = qtc.QSize(sz[0], sz[1])
-    im_sz.scale(port_sz, qtc.Qt.KeepAspectRatio)
-    pixmap = pixmap.scaled(im_sz.width(), im_sz.height(), qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+    sz.scale(port_sz, qtc.Qt.KeepAspectRatio)
+    scl = 0.95  #Scale down slightly to accomodate borders and things
+    pixmap = pixmap.scaled(sz.width()*scl, sz.height()*scl, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+
     self.image_hook.setPixmap(pixmap)
     self.image_hook.adjustSize()
     self.image_hook.show()
@@ -49,8 +50,7 @@ class ImageHandler(qtc.QObject):
     self.show_key(True)
 
     # Make sure this is backing image size, NOT pixmap size
-    b_im_sz = qtc.QSize(sz[0], sz[1])
-    self.image_changed.emit(ImageStatePayload(b_im_sz, im_cols))
+    self.image_changed.emit(ImageStatePayload(sz_b, im_cols))
     
   def show_key(self, changed = False):
 
@@ -151,10 +151,11 @@ class ImageHandler(qtc.QObject):
     if not cont:
       return
     
+    # Factor to reduce image size relative to page
+    scl = 0.8
+    
     filename = value.filename
-    
-    print(filename)
-    
+            
     printer = QPrinter(QPrinter.HighResolution)
     printer.setOutputFormat(QPrinter.PdfFormat)
     printer.setOutputFileName(filename)
@@ -164,45 +165,32 @@ class ImageHandler(qtc.QObject):
     # Colour image
     
     rect = painter.viewport()
-    
     o_sz = rect.size()
-    
-    tmp_im = self.full_image.getImage(opt=False)
-    data = tmp_im.tobytes("raw", "RGB")
-    sz = tmp_im.size
-    sz1 = QSize(sz[0], sz[1])
+            
+    pixmap = self.full_image.getImage(opt=False).toqpixmap()
+    sz = pixmap.size()
+    sz.scale(o_sz, qtc.Qt.KeepAspectRatio)
+    sz = sz*scl
+    # Must scale pixmap manually to ensure transform is fast style, to retain pixelation
+    pixmap = pixmap.scaled(sz.width()*scl, sz.height()*scl, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
 
-    tmp_im = self.full_image.getImage(opt=False)
-    data = tmp_im.tobytes("raw", "RGB")
-    sz = tmp_im.size
-    qimage = QImage(data, sz[0], sz[1], QImage.Format_RGB888) 
-    pixmap = QPixmap.fromImage(qimage)
-    
-    sz1.scale(o_sz, qtc.Qt.KeepAspectRatio)
-    sz1=QSize(sz1.width()*0.9, sz1.height()*0.9)
-    rect.setSize(sz1)
-
-    pixmap = pixmap.scaled(sz1.width(), sz1.height(), qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
-
-    
-#    o_image = QImage(data, sz[0], sz[1], QImage.Format_RGB888) 
- #   painter.drawImage(rect, o_image)
+    rect.setSize(sz)
+    # Move down. If landscape, will centre in width, portrait will centre in height. Other dimension will still fit
+    painter.translate(o_sz.width()*(1-scl)/2, o_sz.height()*(1-scl)/2)
     painter.drawPixmap(rect, pixmap)
     
     printer.newPage()
+
     # Symbolic image
-    
-    tmp_im = toSymbolicImage(self.full_image).getImage(opt=False)
-    data = tmp_im.tobytes("raw", "RGB")
-    sz = tmp_im.size
-    sz1 = QSize(sz[0], sz[1])
-    
-    sz1.scale(o_sz, qtc.Qt.KeepAspectRatio)
-    sz1=QSize(sz1.width()*0.9, sz1.height()*0.9)
-    rect.setSize(sz1)
-    
-    o_image = QImage(data, sz[0], sz[1], QImage.Format_RGB888) 
-    painter.drawImage(rect, o_image)
+    pixmap = toSymbolicImage(self.full_image).getImage(opt=False).toqpixmap()
+    sz = pixmap.size()
+    sz.scale(o_sz, qtc.Qt.KeepAspectRatio)
+    sz = sz*scl
+    # Must scale pixmap manually to ensure transform is fast style, to retain pixelation
+    pixmap = pixmap.scaled(sz.width()*scl, sz.height()*scl, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+
+    rect.setSize(sz)
+    painter.drawPixmap(rect, pixmap)
     
     printer.newPage()
 
