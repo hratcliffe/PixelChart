@@ -38,7 +38,7 @@ def toSymbolicImage(image, guides=None):
   
   return new_image
 
-def getKey(image):
+def getKey(image, sort=True):
 
   bg_col = image.getColourWithMode((255,255,255))
   fg_col = image.getColourWithMode((0,0,0))
@@ -55,5 +55,11 @@ def getKey(image):
     name = nameColourLAB(dPix[item[1], 0])
     new_key.append((item[0], item[1], item[2], item[3], name))
   
+  if sort:
+    # Sort by primary name
+    for item in new_key:
+      print(item[4][1])
+    new_key = sorted(new_key, key=lambda x: (x[4][1],x[4][0]) ) 
+
   return new_key
 
