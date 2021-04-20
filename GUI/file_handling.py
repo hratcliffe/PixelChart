@@ -135,7 +135,9 @@ class FileDetailsHandler(qtc.QObject):
     details["Symbols"] = self.window.symbols_check.isChecked()
     details["Key"] = self.window.key_check.isChecked()
     details["Gauge"] = self.window.gauge_box.currentData()
-    
+    details["PTitle"] = self.window.pattern_title_edit.text()
+    details["PText"] = self.window.pattern_text_edit.toPlainText()
+        
     return details
         
 

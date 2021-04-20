@@ -2,7 +2,7 @@ from PyQt5.QtGui import QPixmap, QImage, QPainter, QFont, QIcon
 from PyQt5.QtWidgets import QGraphicsView, QGridLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 import PyQt5.QtCore as qtc
-from PyQt5.QtCore import QSize
+from PyQt5.QtCore import QSize, QRect
 from PIL import ImageQt
 
 #import KeepAspectRatio, SmoothTransformation
@@ -130,9 +130,9 @@ class ImageHandler(qtc.QObject):
         tmp = tmp + "DMC Colour Approxes "
       setts.append(tmp)
     if details["FinalSize"]:
-      setts.append("Producing Final Size at Gauge {}").format(details["Gauge"])
+      setts.append("Producing Final Size at Gauge {}".format(details["Gauge"]))
     if details["LengthEstimates"]:
-      setts.append("Producing Thread Length Estimates at Gauge {}").format(details["Gauge"])
+      setts.append("Producing Thread Length Estimates at Gauge {}".format(details["Gauge"]))
     
     if not setts:
       setts.append("No Settings To Report")
@@ -185,6 +185,10 @@ class ImageHandler(qtc.QObject):
     
     rect = painter.viewport()
     o_sz = rect.size()
+
+    painter.drawText(QRect(0, 0, o_sz.width(), o_sz.height()/40), qtc.Qt.AlignCenter, value.details["PTitle"])
+    painter.drawText(QRect(0, o_sz.height()/40, o_sz.width(), o_sz.height()/20), qtc.Qt.AlignCenter, value.details["PText"])
+
             
     pixmap = self.full_image.getImage(opt=False).toqpixmap()
     sz = pixmap.size()
@@ -215,6 +219,15 @@ class ImageHandler(qtc.QObject):
     # Create key    
     # Use self.key which was filled last time image was changed
     if value.details["Key"]:
+    
+      do_codes = value.details["RGBCodes"]
+
+      if do_codes:
+        #4 items, 2 sets, plus one padding
+        col_cnt = 5+4
+      else:
+        # 3 items, 4 sets one padding
+        col_cnt = 3*4 + 3
 
       printer.newPage()
       rect = painter.viewport()
@@ -222,7 +235,7 @@ class ImageHandler(qtc.QObject):
       tbl = QTableWidget()
       row = 0
       col = 0
-      tbl.setColumnCount(15)
+      tbl.setColumnCount(col_cnt)
       tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
 
       tbl.horizontalHeader().hide()
@@ -247,9 +260,14 @@ class ImageHandler(qtc.QObject):
         tbl.setItem(row, col, QTableWidgetItem())
         widg = tbl.item(row, col)
         widg.setIcon(QIcon(symMap))
-        col = col + 2
+        col = col + 1
+        if do_codes:
+          tbl.setItem(row, col, QTableWidgetItem(str(item[0])))
+          col = col + 1
+          
+        col = col+1
 
-        if col > 14:
+        if col > col_cnt-1:
           col = 0
           row = row + 1
     
