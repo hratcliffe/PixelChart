@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QPixmap, QImage, QPainter, QFont, QIcon
-from PyQt5.QtWidgets import QGraphicsView, QGridLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView
+from PyQt5.QtWidgets import QGraphicsView, QGridLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView, QProgressDialog
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 import PyQt5.QtCore as qtc
 from PyQt5.QtCore import QSize, QRect
@@ -169,6 +169,10 @@ class ImageHandler(qtc.QObject):
     cont = self.pattern_checks(value.details)
     if not cont:
       return
+
+    progress = QProgressDialog("Saving Pattern", "Abort", 0, 4)
+    progress.setWindowModality(qtc.Qt.WindowModal)
+    progress.forceShow()
     
     # Factor to reduce image size relative to page
     scl = 0.8
@@ -202,7 +206,9 @@ class ImageHandler(qtc.QObject):
     painter.translate(o_sz.width()*(1-scl)/2, o_sz.height()*(1-scl)/2)
     painter.drawPixmap(rect, pixmap)
     
-    if value.details["Symbols"]:
+    progress.setValue(1)
+    
+    if value.details["Symbols"] and not progress.wasCanceled():
       printer.newPage()
 
       # Symbolic image
@@ -216,9 +222,10 @@ class ImageHandler(qtc.QObject):
       rect.setSize(sz)
       painter.drawPixmap(rect, pixmap)
     
+    progress.setValue(2)
     # Create key    
     # Use self.key which was filled last time image was changed
-    if value.details["Key"]:
+    if value.details["Key"] and not progress.wasCanceled():
     
       do_codes = value.details["RGBCodes"]
 
@@ -279,7 +286,12 @@ class ImageHandler(qtc.QObject):
       painter.scale(out_scale, out_scale)
       tbl.render(painter)
 
+    progress.setValue(3)
+
     # Handle descriptors
+
+
+    progress.setValue(4)
 
     
     painter.end()
