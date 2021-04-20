@@ -198,75 +198,69 @@ class ImageHandler(qtc.QObject):
     painter.translate(o_sz.width()*(1-scl)/2, o_sz.height()*(1-scl)/2)
     painter.drawPixmap(rect, pixmap)
     
-    printer.newPage()
+    if value.details["Symbols"]:
+      printer.newPage()
 
-    # Symbolic image
-    pixmap = toSymbolicImage(self.full_image).getImage(opt=False).toqpixmap()
-    sz = pixmap.size()
-    sz.scale(o_sz, qtc.Qt.KeepAspectRatio)
-    sz = sz*scl
-    # Must scale pixmap manually to ensure transform is fast style, to retain pixelation
-    pixmap = pixmap.scaled(sz.width()*scl, sz.height()*scl, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+      # Symbolic image
+      pixmap = toSymbolicImage(self.full_image).getImage(opt=False).toqpixmap()
+      sz = pixmap.size()
+      sz.scale(o_sz, qtc.Qt.KeepAspectRatio)
+      sz = sz*scl
+      # Must scale pixmap manually to ensure transform is fast style, to retain pixelation
+      pixmap = pixmap.scaled(sz.width()*scl, sz.height()*scl, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
 
-    rect.setSize(sz)
-    painter.drawPixmap(rect, pixmap)
+      rect.setSize(sz)
+      painter.drawPixmap(rect, pixmap)
     
-    printer.newPage()
-
-    rect = painter.viewport()
-
     # Create key    
     # Use self.key which was filled last time image was changed
-    
-    tbl = QTableWidget()
-    row = 0
-    col = 0
-    tbl.setColumnCount(15)
-    tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-#    tbl.horizontalHeader().setStretchLastSection(True)
+    if value.details["Key"]:
 
-    tbl.horizontalHeader().hide()
-    tbl.verticalHeader().hide()
+      printer.newPage()
+      rect = painter.viewport()
 
-    for item in self.key:
-      tbl.setRowCount(row+1)
+      tbl = QTableWidget()
+      row = 0
+      col = 0
+      tbl.setColumnCount(15)
+      tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+
+      tbl.horizontalHeader().hide()
+      tbl.verticalHeader().hide()
+
+      for item in self.key:
+        tbl.setRowCount(row+1)
       
-      tbl.setItem(row, col, QTableWidgetItem(" ".join(item[4])))
-      col = col + 1
+        tbl.setItem(row, col, QTableWidgetItem(" ".join(item[4])))
+        col = col + 1
 
-      badgeMap = item[2].toqpixmap()
-      badgeMap = badgeMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
-      tbl.setItem(row, col, QTableWidgetItem())
-      widg = tbl.item(row, col)
-      widg.setIcon(QIcon(badgeMap))
+        badgeMap = item[2].toqpixmap()
+        badgeMap = badgeMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+        tbl.setItem(row, col, QTableWidgetItem())
+        widg = tbl.item(row, col)
+        widg.setIcon(QIcon(badgeMap))
 
-      col = col + 1
+        col = col + 1
 
-      symMap = item[3].toqpixmap()
-      symMap = symMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
-      tbl.setItem(row, col, QTableWidgetItem())
-      widg = tbl.item(row, col)
-      widg.setIcon(QIcon(symMap))
-      col = col + 1
+        symMap = item[3].toqpixmap()
+        symMap = symMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+        tbl.setItem(row, col, QTableWidgetItem())
+        widg = tbl.item(row, col)
+        widg.setIcon(QIcon(symMap))
+        col = col + 2
 
-      # Spare column between
-      col = col + 1
-
-      if col > 14:
-        col = 0
-        row = row + 1
-
+        if col > 14:
+          col = 0
+          row = row + 1
     
-    tbl_sz = tbl.size()
-    print(tbl_sz, rect)
+      tbl_sz = tbl.size()
+      tbl.setMaximumSize(tbl_sz)
+      tbl.setMinimumSize(tbl_sz)
     
-    tbl.setMaximumSize(tbl_sz)
-    tbl.setMinimumSize(tbl_sz)
-    
-    out_scale = min(rect.width()/tbl_sz.width(), rect.height()/tbl_sz.height())*0.95
-    print(out_scale)
-    painter.scale(out_scale, out_scale)
-    tbl.render(painter)
+      out_scale = min(rect.width()/tbl_sz.width(), rect.height()/tbl_sz.height())*0.95
+      painter.scale(out_scale, out_scale)
+      tbl.render(painter)
+
     # Handle descriptors
 
     
