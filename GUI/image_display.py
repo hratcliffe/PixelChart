@@ -8,6 +8,7 @@ from PIL import ImageQt
 #import KeepAspectRatio, SmoothTransformation
 
 from ColourHandling import *
+from XStitchHeuristics import *
 from .types import ImageStatePayload, ImageChangePayload
 from .warnings import PresaveDialog
 
@@ -192,6 +193,10 @@ class ImageHandler(qtc.QObject):
 
     painter.drawText(QRect(0, 0, o_sz.width(), o_sz.height()/40), qtc.Qt.AlignCenter, value.details["PTitle"])
     painter.drawText(QRect(0, o_sz.height()/40, o_sz.width(), o_sz.height()/20), qtc.Qt.AlignCenter, value.details["PText"])
+    if value.details["FinalSize"]:
+      sz = estimateSize(self.full_image.coreImage.size, value.details["Gauge"])
+      mess = "{} by {} stitches, approx {}cm by {}cm at gauge {}".format(self.full_image.coreImage.size[0], self.full_image.coreImage.size[1], round(sz['cm'][0], 1), round(sz['cm'][1], 1), value.details["Gauge"])
+      painter.drawText(QRect(0, o_sz.height()/20, o_sz.width(), 3*o_sz.height()/40), qtc.Qt.AlignCenter,  mess)
 
             
     pixmap = self.full_image.getImage(opt=False).toqpixmap()
@@ -287,9 +292,65 @@ class ImageHandler(qtc.QObject):
       tbl.render(painter)
 
     progress.setValue(3)
-
+    
     # Handle descriptors
+    
+    # Show final size estimate
+    
+    
+    # Reprint key without names, but with codes (if requested) and lengths (if requested). Only do this if one of those options was requested
+    if (value.details["ColourNumbers"] or  value.details["LengthEstimates"]) and not progress.wasCanceled():
+      col_per = 1
+      if value.details["ColourNumbers"]:
+        col_per = col_per + 1
+      elif value.details["LengthEstimates"]:
+        col_per = col_per + 1
 
+      col_cnt = col_per * 4 - 1
+
+      rect = painter.viewport()
+
+      tbl = QTableWidget()
+      row = 0
+      col = 0
+      tbl.setColumnCount(col_cnt)
+      tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+
+      tbl.horizontalHeader().hide()
+      tbl.verticalHeader().hide()
+
+      for item in self.key:
+        tbl.setRowCount(row+1)
+
+        symMap = item[3].toqpixmap()
+        symMap = symMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+        tbl.setItem(row, col, QTableWidgetItem())
+        widg = tbl.item(row, col)
+        widg.setIcon(QIcon(symMap))
+        col = col + 1
+
+        if value.details["ColourNumbers"]:
+          tbl.setItem(row, col, QTableWidgetItem("na"))
+          col = col + 1
+
+        if value.details["LengthEstimates"]:
+          length = str(round(estimateLength(self.full_image, item[0], value.details["Gauge"]), 1))+'m'
+          tbl.setItem(row, col, QTableWidgetItem(length))
+          col = col + 1
+
+        col = col+1
+
+        if col > col_cnt-1:
+          col = 0
+          row = row + 1
+    
+      tbl_sz = tbl.size()
+      tbl.setMaximumSize(tbl_sz)
+      tbl.setMinimumSize(tbl_sz)
+    
+      # Move down below previous table. 
+      painter.translate(0, tbl_sz.height())
+      tbl.render(painter)
 
     progress.setValue(4)
 
