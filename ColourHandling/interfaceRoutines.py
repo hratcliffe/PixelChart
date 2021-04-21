@@ -57,8 +57,6 @@ def getKey(image, sort=True):
   
   if sort:
     # Sort by primary name
-    for item in new_key:
-      print(item[4][1])
     new_key = sorted(new_key, key=lambda x: (x[4][1],x[4][0]) ) 
 
   return new_key
