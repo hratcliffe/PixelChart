@@ -172,11 +172,11 @@ def extractRunAndCounts(image, im_sz):
 
   # 2-D indexing because we want row-wise result
   # TODO this is running columns first. FIX
-  for i in range(0, im_sz[0]-1):
+  for i in range(0, im_sz[0]):
     row = []
     last = image[i, 0]
     count = 1
-    for j in range(1, im_sz[1]-1):
+    for j in range(1, im_sz[1]):
 
       if image[i, j] == last:
         count = count + 1 
@@ -187,8 +187,8 @@ def extractRunAndCounts(image, im_sz):
           colCounts[last] = colCounts[last] + count # Add to cumulative counts
         except:
           colCounts[last] = count # Start cumulative counts
-        last = image[i,j] # Reset
-        count = 1
+        last = image[i,j] # Reset current colour 
+        count = 1 # Reset count
     ImRLE.append(row)
 
   return (ImRLE, colCounts)  
