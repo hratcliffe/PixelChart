@@ -99,6 +99,7 @@ class FileDetailsHandler(qtc.QObject):
 
   def extras_button_clicked(self):
     extrasDialog = FileExtras(self.extras_dict)
+    extrasDialog.connect_checks(self.needs_key)
     extrasDialog.exec_()
     self.extras_dict = extrasDialog.get_selections()
 
@@ -145,6 +146,10 @@ class FileDetailsHandler(qtc.QObject):
   def on_image_changed(self, value):
     self.set_resize_sliders(value.sz.width(), value.sz.height())
 
+  def needs_key(self, value):
+    # Use to enable key when extras are picked
+    if value:
+      self.window.key_check.setChecked(1)
 
 class FileExtras(QDialog):
   dialog_file = files('GUI').joinpath('ExtrasDialog.ui')
@@ -185,6 +190,10 @@ class FileExtras(QDialog):
     select["FinalSize"] = self.size_check.isChecked()    
     return select
 
+  def connect_checks(self, slot):
+  
+    self.rgb_check.stateChanged.connect(slot)
+    #self.colour_check.stateChanged.connect(slot)
 
 
 def setup_file_info(window, name):
