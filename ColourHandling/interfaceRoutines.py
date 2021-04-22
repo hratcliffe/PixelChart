@@ -1,6 +1,6 @@
 from . import imageExt
 from .detect import mergeColours
-from .replace import replaceColours, addGuide, makeKeyItems, makeDummy
+from .replace import replaceColours, addGuide, makeKeyItems, makeDummy, makeSwatchItem
 from .symbols import getUpscaling
 from .identify import nameColourLAB
 
@@ -61,3 +61,7 @@ def getKey(image, sort=True):
 
   return new_key
 
+def makeSwatch(rgb):
+  # Make a colour swatch from rgb code
+  
+  return makeSwatchItem(rgb, mode='RGB')
