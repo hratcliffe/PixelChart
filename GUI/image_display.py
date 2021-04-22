@@ -24,6 +24,8 @@ class ImageHandler(qtc.QObject):
     self.full_image = None
     self.key_layout = None
     self.key = None
+    
+    self.cChart = colourChart()
 
     
   def show_image_from_file(self, filename):
@@ -302,11 +304,11 @@ class ImageHandler(qtc.QObject):
     if (value.details["ColourNumbers"] or  value.details["LengthEstimates"]) and not progress.wasCanceled():
       col_per = 2
       if value.details["ColourNumbers"]:
-        col_per = col_per + 1
+        col_per = col_per + 2
       elif value.details["LengthEstimates"]:
         col_per = col_per + 1
 
-      col_cnt = col_per * 4 - 1
+      col_cnt = col_per * 3 - 1
 
       rect = painter.viewport()
 
@@ -330,8 +332,21 @@ class ImageHandler(qtc.QObject):
         col = col + 1
 
         if value.details["ColourNumbers"]:
-          tbl.setItem(row, col, QTableWidgetItem("na"))
+          r, g, b = item[0][0:3] #Ignore alpha if present
+          colour = self.cChart.matchColour(colourItem(r, g, b))
+          tbl.setItem(row, col, QTableWidgetItem(colour.name))
           col = col + 1
+          tbl.setItem(row, col, QTableWidgetItem(colour.num))
+          col = col + 1
+
+          symMap = makeSwatch(colour.rgb).toqpixmap()
+          symMap = symMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+          tbl.setItem(row, col, QTableWidgetItem())
+          widg = tbl.item(row, col)
+          widg.setIcon(QIcon(symMap))
+          col = col + 1
+
+
 
         if value.details["LengthEstimates"]:
           length = str(round(estimateLength(self.full_image, item[0], value.details["Gauge"]), 1))+'m'
