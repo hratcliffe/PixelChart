@@ -300,7 +300,7 @@ class ImageHandler(qtc.QObject):
     
     # Reprint key without names, but with codes (if requested) and lengths (if requested). Only do this if one of those options was requested
     if (value.details["ColourNumbers"] or  value.details["LengthEstimates"]) and not progress.wasCanceled():
-      col_per = 1
+      col_per = 2
       if value.details["ColourNumbers"]:
         col_per = col_per + 1
       elif value.details["LengthEstimates"]:
