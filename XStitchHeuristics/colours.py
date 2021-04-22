@@ -1,5 +1,7 @@
 import csv
+import numpy as np
 from math import sqrt
+from scipy.spatial import KDTree
 
 class colourChart:
 
@@ -15,29 +17,44 @@ class colourChart:
         self.chart.append(colourChartItem(name=line[1], num=(line[0]), r=int(line[2]), g=int(line[3]), b=int(line[4]), brand='DMC'))
         
         
-    self.searchTree = buildTree(self.chart, index='order', data='rgb') 
+    self.searcher = buildTree(self.chart, data='rgb') 
 
-  def euclideanDist(colour1, colour2):
-
-    return (sqrt((colour1[0]-colour2[0])**2 + (colour1[1]-colour2[1])**2 + (colour1[2]-colour2[2])**2))
-
-  def matchColour(self, colourIn, numOptions=1, dist=euclideanDist):
-    #Return closest colour(s) to given one, using distance algorithm as given
+  def matchColour(self, colour, numOptions=1):
+    #Return closest item to given one
     # Default is to return single closest, numOptions is the number of matches, best to worst, to return
-    print("Not implemented yet")
-    pass
-    
-def buildTree(lst, index, data):
-  # Build search tree for rapid searches over `list`. index is the property to use as the key, data is the property name to use as the distance. Data should be a triplet
-  
-  for cnt, item in enumerate(lst):
-    if index =='order':
-      ind = cnt
-    else:
-      ind = getattr(item, index)
-    print(ind, getattr(item, data))
+    return self.searcher.find(colour, numOptions)
 
-  print("Not implemented yet")
+    
+def buildTree(lst, data):
+  # Build search tree for rapid searches over `list`. data is the property name to use as the distance. Data should be a triplet
+
+  dat_arr = np.zeros((len(lst), 3))
+  for cnt, item in enumerate(lst):
+    dat_arr[cnt] = getattr(item, data)
+
+  sTree = KDTree(dat_arr)
+  return searcher(sTree, lst, data)
+  
+class searcher:
+
+  def __init__(self, tree, items, dataProp):
+    self.tree = tree
+    self.items = items
+    self.dataProp = dataProp
+    
+  def find(self, item, numOptions):
+    #Return closest item to given one
+    # Default is to return single closest, numOptions is the number of matches, best to worst, to return
+
+    dist,points = self.tree.query(getattr(item, self.dataProp), numOptions)
+
+    if numOptions > 1:
+      fnd_items = []
+      for pt in points:
+        fnd_items.append(self.items[pt])
+      return fnd_items
+    else:
+      return self.items[points]
 
 class colourChartItem:
 
@@ -48,4 +65,14 @@ class colourChartItem:
     self.brand = brand
     self.rgb = (r, g, b)
     
+  def __str__(self):
+    return "{}, {}, ({})".format(self.num, self.name, self.rgb)
+
+class colourItem:
+
+  def __init__(self, r=0, g=0, b=0):
+  
+    self.rgb = (r, g, b)
     
+  def __str__(self):
+    return "({})".format(self.rgb)
