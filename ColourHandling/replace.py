@@ -155,6 +155,15 @@ def makeKeyItems(colourToSymbolMap, bg_col, fg_col, mode='RGB', outline=True):
   
 
   return els
+
+def makeSwatchItem(colour, mode='RGB', outline=True):
+  # Create swatch in given mode colour
+
+  # Use symbol size as base size
+  scale_sz = symbols.getUpscaling()
+  blob_sz = (scale_sz+1, scale_sz+1)
+
+  return Image.new(mode, blob_sz, colour)
   
 def makeDummy(colourMap):
 
