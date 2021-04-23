@@ -1,3 +1,4 @@
+from os import linesep
 
 #All symbols are 9x9 pixel elements, since this is a good upscaling size and gives moderate detail levels, while leaving one pixel for edging etc in a 10x10 square
 # See txt file for shapes
@@ -6,8 +7,6 @@ _symSize = 9
 _edgSize = 1
 
 _symbols = None
-
-from os import linesep
 
 class SymbolDefinitionError(Exception):
   pass
@@ -76,8 +75,7 @@ def getUpscaling():
   return _symSize + _edgSize
 
 def loadSymbols(force = False):
-
-  # TODO Only load if not already??
+  """Loads Symbols from file into global _symbols. Use force=True to reload regardless of whether symbols are already loaded"""
   global _symbols
   
   if force or _symbols is None:
