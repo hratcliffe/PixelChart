@@ -3,6 +3,16 @@ import numpy as np
 from math import sqrt
 from scipy.spatial import KDTree
 
+def listBrands():
+
+  from importlib_resources import files
+  brandsFile = files('Data').joinpath('brands.csv')
+  with open(brandsFile, 'r') as infile:
+    rdr = csv.reader(infile, delimiter=',')
+    lines = list(rdr)
+
+  return(lines)
+
 class colourChart:
 
   def __init__(self, brand = "DMC"):
