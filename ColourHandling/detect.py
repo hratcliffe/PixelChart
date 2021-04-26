@@ -1,7 +1,9 @@
 from . import imageExt
+
 from sklearn.cluster import KMeans
 from skimage import feature
 from PIL import Image, ImageOps
+
 from math import floor
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,11 +23,8 @@ def mergeColours(imageIn, n_cols=20):
   # Report on result  
   print("Colour reduction complete after {} iterations. Final inertia {}".format(kmeans.n_iter_, kmeans.inertia_))
 
-  
-  # Create new image where each colour is remapped to the centroid of its cluster. NB we could skip this and go straight to indexing by cluster number... TODO do something about that?
-  
-  # TODO can we just do the clustering on the colour list instead? Is it very slow to do replacements? We could create a map to do it with
-  
+  # Create new image where each colour is remapped to the centroid of its cluster.
+    
   new_colours = []
   # Convert from arrays back to tuples
   for item in kmeans.cluster_centers_ :
@@ -37,13 +36,11 @@ def mergeColours(imageIn, n_cols=20):
   
   # Remap
   for k in range(0, sz[0]*sz[1]-1):
-    # TODO check this logic is right way round for non-squre
     j = int(floor(k/sz[0]))
     i = int(k - j * sz[0])
     cluster_num = kmeans.labels_[k]
     new_val = [int(c) for c in new_colours[cluster_num]]
     new_val = tuple(new_val)
-    #TODO is this transposing input image?
     pixelsNew[i, j] = new_val
 
   return imNew
