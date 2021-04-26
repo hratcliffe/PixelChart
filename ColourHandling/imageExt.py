@@ -1,5 +1,8 @@
-from PIL import Image, ImageCms
 from . import detect, replace
+from .image_helpers import imageModeHelper
+
+from PIL import Image
+
 from math import floor
 
 
@@ -10,7 +13,6 @@ from math import floor
 # Symbolic info is also in here, such as colour <-> symbol mappings
 
 
-# TODO store as IDs and convert back to colours on output, so add converter
 class imageExt:
     
   def __init__(self, image, pixels, maps):
@@ -22,6 +24,7 @@ class imageExt:
     self.colourCounts = counts
     self.optImage = None
     self.optImageInUse = False
+    self.imageHelper = imageModeHelper()
 
   def resize(self, width, height):
   
@@ -46,7 +49,7 @@ class imageExt:
   def setOptimisedMode(self):
     """Convert core image into whatever mode we determine is best. This may be varied depending on content. Any modifications to image are undone by the output stages """
     
-    self.optImage = changeModeGeneric(self.coreImage, "RGB", "LAB")
+    self.optImage = self.imageHelper.changeMode(self.coreImage, "RGB", "LAB")
     
     return self
   
@@ -85,7 +88,7 @@ class imageExt:
       self.runImage = im
       self.colourCounts = counts
     else:
-      newIm = changeModeGeneric(image, image.mode, "RGB")
+      newIm = self.imageHelper.changeMode(image, image.mode, "RGB")
       self.coreImage = newIm
       self.optImage = None
       self.optImageInUse = False
@@ -99,7 +102,7 @@ class imageExt:
 
   def show(self):
   
-    """ Wraps show so that we can keep variuos images sync'd etc"""
+    """ Wraps show so that we can keep various images sync'd etc"""
     
     if self.optImageInUse:
       self.setImage(self.optImage)
@@ -154,8 +157,6 @@ class imageExt:
     colours = findColours(pixels, sz)
     colourMaps = replace.mapColours(colours)
 
-    # TODO store as ids?
-
     return imageExt(im, pixels, colourMaps)
 
     
@@ -209,27 +210,6 @@ def findColours(pixels, sz):
 
   return colours
   
-def changeModeGeneric(image, init, final):
-
-  # TODO find a saner way to make these changes
-  # Note : "["LAB", "XYZ", "sRGB"]" are available colour spaces"
-  
-  if init == "RGB":
-    init_profile = ImageCms.createProfile("sRGB")
-  else:
-    init_profile = ImageCms.createProfile(init)
-
-  if final == "RGB":
-    final_profile = ImageCms.createProfile("sRGB")
-  else:
-    final_profile  = ImageCms.createProfile(final)
-
-  # TODO stash transforms? How much do we use them?
-  transform = ImageCms.buildTransformFromOpenProfiles(init_profile, final_profile, init, final)
-
-  return ImageCms.applyTransform(image, transform)
-
-
 # Custom errors. 
 class ImageReadError(Exception):
   pass
