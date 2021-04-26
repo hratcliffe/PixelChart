@@ -11,7 +11,7 @@ class colourChart:
     coloursFile = files('Data').joinpath(filename)
 
     self.chart = []
-    with open(filename, 'r') as infile:
+    with open(coloursFile, 'r') as infile:
       rdr=csv.reader(infile, delimiter=',')
       for line in rdr:
         self.chart.append(colourChartItem(name=line[1], num=(line[0]), r=int(line[2]), g=int(line[3]), b=int(line[4]), brand='DMC'))
