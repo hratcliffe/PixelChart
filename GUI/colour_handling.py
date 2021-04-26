@@ -43,7 +43,7 @@ class ColourOptionsHandler(qtc.QObject):
     # Extract colour options
     num = self.window.colour_num_select.value()
     
-    vals = {"Emphasize": self.window.emphasize_select.currentData(), "Optimize": self.window.optimize_select.currentData()}
+    vals = {"Emphasize": self.window.emphasize_select.currentData(), "Optimize": self.window.optimize_select.currentData(), "Palette":self.window.palette_select.currentData()}
     
     self.image_change_request.emit(ImageChangePayload(num, opts=vals))
         
