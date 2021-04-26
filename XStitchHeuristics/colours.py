@@ -5,18 +5,19 @@ from scipy.spatial import KDTree
 
 class colourChart:
 
-  def __init__(self, filename='DMCData.csv'):
+  def __init__(self, filename='DMC_Data.csv', brand='DMC'):
   
     from importlib_resources import files
     coloursFile = files('Data').joinpath(filename)
 
     self.chart = []
-    with open('Data/DMCData.csv', 'r') as infile:
+    with open(filename, 'r') as infile:
       rdr=csv.reader(infile, delimiter=',')
       for line in rdr:
         self.chart.append(colourChartItem(name=line[1], num=(line[0]), r=int(line[2]), g=int(line[3]), b=int(line[4]), brand='DMC'))
         
-        
+    self.brand = brand  # Brand can also be special value "Custom" which implies a mixture - each colour can differ - otherwise each colour should be brand-None
+    self.srcfile = filename
     self.searcher = buildTree(self.chart, data='rgb') 
 
   def matchColour(self, colour, numOptions=1):
@@ -58,7 +59,7 @@ class searcher:
 
 class colourChartItem:
 
-  def __init__(self, name='Name', num=0, r=0, g=0, b=0, brand="n/a"):
+  def __init__(self, name='Name', num=0, r=0, g=0, b=0, brand=None):
   
     self.name = name
     self.num = num 
