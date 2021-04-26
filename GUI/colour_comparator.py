@@ -25,7 +25,7 @@ class ColourComparator(QWidget):
     # Test - use some random colour
 
     self.iColourLabel.setText(_subs(self.iColourLabel.text(), str(inputColour)))
-    self.matchLabel.setText(_subs(self.matchLabel.text(), "BRAND"))
+    self.matchLabel.setText(_subs(self.matchLabel.text(), self.cChart.brand))
 
 
     r,g,b = inputColour
