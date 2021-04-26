@@ -5,22 +5,37 @@ from scipy.spatial import KDTree
 
 class colourChart:
 
-  def __init__(self, filename='DMC_Data.csv'):
+  def __init__(self, brand = "DMC"):
   
     from importlib_resources import files
+    filename = brand + '_Data.csv'
+
+    # Check brand is valid and get short-code
+    brandsFile = files('Data').joinpath('brands.csv')
+
+    gotBrand = False
+    with open(brandsFile, 'r') as infile:
+      rdr = csv.reader(infile, delimiter=',')
+      for line in rdr:
+        if brand in line:
+          gotBrand = True
+          self.brandCode = line[1]
+
+    if not gotBrand:
+      print("Error - no colour data for {}".format(brand))
+      return
+
     coloursFile = files('Data').joinpath(filename)
 
-    brand = filename.split('_')[0]
-
-    isCustom = "Custom" in brand
+    self.isCustom = "Custom" in brand
 
     self.brand = brand  # Brand can also be special value "Custom" which implies a mixture - each colour can differ - otherwise each colour can either be as parent, or be Brand None
     self.srcfile = filename
 
     self.chart = []
     with open(coloursFile, 'r') as infile:
-      rdr=csv.reader(infile, delimiter=',')
-      if isCustom:
+      rdr = csv.reader(infile, delimiter=',')
+      if self.isCustom:
         for line in rdr:
           self.chart.append(colourChartItem(name=line[1], num=(line[0]), r=int(line[2]), g=int(line[3]), b=int(line[4]), brand=line[5]))
       else:
