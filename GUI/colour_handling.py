@@ -9,7 +9,7 @@ import sys
 
 from ColourHandling.detect import mergeColours
 from .types import ImageStatePayload, ImageChangePayload
-
+from XStitchHeuristics.colours import listBrands
 
 _default_reduce_number = 20
 
@@ -68,3 +68,8 @@ def fill_colour_combos(window):
   window.optimize_select.addItem("Portrait", 'p')    
   window.optimize_select.addItem("Object", 'o')
   
+  brands = listBrands()
+  window.palette_select.addItem("None", 'none')  
+  for item in brands:
+    window.palette_select.addItem(item[0], item[1])
+    
