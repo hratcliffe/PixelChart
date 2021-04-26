@@ -16,7 +16,20 @@ def mapColours(colours):
     bk_map[cnt] = item
   
   return (fw_map, bk_map)
-  
+
+def changeColours(originalImage, recolourMap ):
+  """Create the image with colours remapped as in recolourMap"""
+
+  pixels = originalImage.load()
+  sz = originalImage.size
+  for i in range(sz[0]):
+    for j in range(sz[1]):
+      try:
+        pixels[i,j] = recolourMap[pixels[i,j]]
+      except:
+        # Skip any colour without remap instruction
+        pass
+  return originalImage 
   
 def replaceColours(originalImage, colourToSymbolMap, colour1, colour2 ):
   """Create the image with colours replaced by symbols"""

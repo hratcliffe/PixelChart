@@ -1,6 +1,6 @@
 from . import imageExt
 from .detect import mergeColours
-from .replace import replaceColours, addGuide, makeKeyItems, makeDummy, makeSwatchItem
+from .replace import replaceColours, changeColours, addGuide, makeKeyItems, makeDummy, makeSwatchItem
 from .symbols import getUpscaling
 from .identify import nameColourLAB
 
@@ -10,6 +10,11 @@ def reduceColours(image, n_cols, opt=False):
   new_image = mergeColours(image.getImage(opt), n_cols)
   image.setImage(new_image)
 
+
+def recolour(image, map):
+
+  new_image = changeColours(image.getImage(False), map)
+  image.setImage(new_image)
 
 def resizeImage(image, width, height):
 
