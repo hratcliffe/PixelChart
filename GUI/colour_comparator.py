@@ -68,12 +68,17 @@ class ColourComparator(QWidget):
     self.gridLayout.addWidget(self.inputSwatch, 1, 0, len(matches), 2)
     self.inputSwatch.adjustSize()
 
+
   def selected(self, val):
     selection = int(self.sender().text().strip(')'))
 
 def _subs(text, sub):
   # Substitue sub into text where FIRST <> are found. If there are more than one pair, can call repeatedly and will subs from left to right
-  res = re.match(r"(.*)<.*>(.*)", text)
-  new_str = [res.group(1), sub, res.group(2)]
+
+  try:
+    res = re.match(r"(.*)<.*>(.*)", text)
+    new_str = [res.group(1), sub, res.group(2)]
   
-  return ''.join(new_str)
+    return ''.join(new_str)
+  except:
+    return text
