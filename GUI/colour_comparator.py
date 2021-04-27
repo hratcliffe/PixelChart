@@ -15,13 +15,12 @@ import random
 class ColourComparator(QWidget):
   widget_file = files('GUI').joinpath('ColourComparator.ui')
 
-  def __init__(self):
+  def __init__(self, chart ="DMC"):
     super(ColourComparator, self).__init__()
     uic.loadUi(self.widget_file, self) # Load the .ui file
     
-    self.cChart = colourChart()
+    self.cChart = colourChart(chart)
     self.setup_layout()
-    self.show()
         
   def setup_layout(self, inputColour=None, nMatches=8):
     # Test - use some random colour

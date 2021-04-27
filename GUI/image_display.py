@@ -11,6 +11,7 @@ from ColourHandling import *
 from XStitchHeuristics import *
 from .types import ImageStatePayload, ImageChangePayload
 from .warnings import PresaveDialog
+from .recolour import RecolourDialog
 
 class ImageHandler(qtc.QObject):
   image_changed = qtc.pyqtSignal(ImageStatePayload, name="image_changed")
@@ -93,8 +94,12 @@ class ImageHandler(qtc.QObject):
   def modify_image(self, image, change_payload):
     """Modify the given image according to the given ImageChangePayload"""
   
-    reduceColours(image, change_payload.n_cols)    
+    reduceColours(image, change_payload.n_cols)
+
+    recolourD = RecolourDialog(change_payload.opts["Palette"])
+    recolourD.do_recolour(image)
     self.change_image(image)
+
 
   def resize_image(self, image, resize_payload):
     """Modify the given image according to the given ImageResizePayload"""
