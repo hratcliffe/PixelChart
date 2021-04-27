@@ -5,10 +5,10 @@ import PyQt5.QtCore as qtc
 from PyQt5.QtCore import QSize, QRect
 from PIL import ImageQt
 
-#import KeepAspectRatio, SmoothTransformation
 
 from ColourHandling import *
 from XStitchHeuristics import *
+from Graphics import *
 from .types import ImageStatePayload, ImageChangePayload
 from .warnings import PresaveDialog
 from .recolour import RecolourDialog
@@ -25,6 +25,7 @@ class ImageHandler(qtc.QObject):
     self.full_image = None
     self.key_layout = None
     self.key = None
+    self.pGen = PatternGenerator()
     
     self.cChart = colourChart()
 
@@ -110,47 +111,11 @@ class ImageHandler(qtc.QObject):
   def pattern_checks(self, details):
     # Show pattern details and verify anything "suspicious"
     
-    # Use constants so we can make these configurable later
-    max_sz = (200, 200)
-    max_colours = 50
-        
-    warnings = []
-
-    im_sz = self.full_image.getImage(opt=False).size
-    if im_sz[0] > max_sz[0] or im_sz[1] > max_sz[1]:
-      warnings.append("Image size is very large ({} x {})".format(im_sz[0], im_sz[1]))
-
-    im_cols = len(self.full_image.colourCounts)
-    if im_cols > max_colours:
-      warnings.append("Number of colours is very large ({}). Symbolic pattern will have repeats!".format(im_cols))
-      
-    setts = []
-
-    if details["Symbols"]:
-      setts.append("Producing Symbolic Chart")
-    if details["Key"]:
-      setts.append("Producing Colour Key")
-    if details["RGBCodes"] or details["ColourNumbers"]:
-      tmp = "Producing Colour Ids: "
-      if details["RGBCodes"]:
-        tmp = tmp + "RGB codes "
-      if details["ColourNumbers"]:
-        tmp = tmp + "DMC Colour Approxes "
-      setts.append(tmp)
-    if details["FinalSize"]:
-      setts.append("Producing Final Size at Gauge {}".format(details["Gauge"]))
-    if details["LengthEstimates"]:
-      setts.append("Producing Thread Length Estimates at Gauge {}".format(details["Gauge"]))
-    
-    if not setts:
-      setts.append("No Settings To Report")
-
-    if not warnings:
-      warnings.append("No Warnings To Report")
+    checks = self.pGen.checks(details, self.full_image.getImage(opt=False).size, len(self.full_image.colourCounts))
 
     checkDialog = PresaveDialog()
-    checkDialog.fill_warnings(warnings)
-    checkDialog.fill_settings(setts)
+    checkDialog.fill_warnings(checks["warnings"])
+    checkDialog.fill_settings(checks["settings"])
     checkDialog.show()
 
     return checkDialog.exec_() 
@@ -178,206 +143,8 @@ class ImageHandler(qtc.QObject):
     if not cont:
       return
 
-    progress = QProgressDialog("Saving Pattern", "Abort", 0, 4)
-    progress.setWindowModality(qtc.Qt.WindowModal)
-    progress.forceShow()
-    
-    # Factor to reduce image size relative to page
-    scl = 0.8
-    
-    filename = value.filename
-            
-    printer = QPrinter(QPrinter.HighResolution)
-    printer.setOutputFormat(QPrinter.PdfFormat)
-    printer.setOutputFileName(filename)
-    
-    painter = QPainter()
-    painter.begin(printer)
-    # Colour image
-    
-    rect = painter.viewport()
-    o_sz = rect.size()
-
-    painter.drawText(QRect(0, 0, o_sz.width(), o_sz.height()/40), qtc.Qt.AlignCenter, value.details["PTitle"])
-    painter.drawText(QRect(0, o_sz.height()/40, o_sz.width(), o_sz.height()/20), qtc.Qt.AlignCenter, value.details["PText"])
-    if value.details["FinalSize"]:
-      sz = estimateSize(self.full_image.coreImage.size, value.details["Gauge"])
-      mess = "{} by {} stitches, approx {}cm by {}cm at gauge {}".format(self.full_image.coreImage.size[0], self.full_image.coreImage.size[1], round(sz['cm'][0], 1), round(sz['cm'][1], 1), value.details["Gauge"])
-      painter.drawText(QRect(0, o_sz.height()/20, o_sz.width(), 3*o_sz.height()/40), qtc.Qt.AlignCenter,  mess)
-
-            
-    pixmap = self.full_image.getImage(opt=False).toqpixmap()
-    sz = pixmap.size()
-    sz.scale(o_sz, qtc.Qt.KeepAspectRatio)
-    sz = sz*scl
-    # Must scale pixmap manually to ensure transform is fast style, to retain pixelation
-    pixmap = pixmap.scaled(sz.width()*scl, sz.height()*scl, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
-
-    rect.setSize(sz)
-    # Move down. If landscape, will centre in width, portrait will centre in height. Other dimension will still fit
-    painter.translate(o_sz.width()*(1-scl)/2, o_sz.height()*(1-scl)/2)
-    painter.drawPixmap(rect, pixmap)
-    
-    progress.setValue(1)
-    
-    if value.details["Symbols"] and not progress.wasCanceled():
-      printer.newPage()
-
-      # Symbolic image
-      pixmap = toSymbolicImage(self.full_image).getImage(opt=False).toqpixmap()
-      sz = pixmap.size()
-      sz.scale(o_sz, qtc.Qt.KeepAspectRatio)
-      sz = sz*scl
-      # Must scale pixmap manually to ensure transform is fast style, to retain pixelation
-      pixmap = pixmap.scaled(sz.width()*scl, sz.height()*scl, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
-
-      rect.setSize(sz)
-      painter.drawPixmap(rect, pixmap)
-    
-    progress.setValue(2)
-    # Create key    
-    # Use self.key which was filled last time image was changed
-    if value.details["Key"] and not progress.wasCanceled():
-    
-      do_codes = value.details["RGBCodes"]
-
-      if do_codes:
-        #4 items, 2 sets, plus one padding
-        col_cnt = 5+4
-      else:
-        # 3 items, 4 sets one padding
-        col_cnt = 3*4 + 3
-
-      printer.newPage()
-      rect = painter.viewport()
-
-      tbl = QTableWidget()
-      row = 0
-      col = 0
-      tbl.setColumnCount(col_cnt)
-      tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-
-      tbl.horizontalHeader().hide()
-      tbl.verticalHeader().hide()
-
-      for item in self.key:
-        tbl.setRowCount(row+1)
-      
-        tbl.setItem(row, col, QTableWidgetItem(" ".join(item[4])))
-        col = col + 1
-
-        badgeMap = item[2].toqpixmap()
-        badgeMap = badgeMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
-        tbl.setItem(row, col, QTableWidgetItem())
-        widg = tbl.item(row, col)
-        widg.setIcon(QIcon(badgeMap))
-
-        col = col + 1
-
-        symMap = item[3].toqpixmap()
-        symMap = symMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
-        tbl.setItem(row, col, QTableWidgetItem())
-        widg = tbl.item(row, col)
-        widg.setIcon(QIcon(symMap))
-        col = col + 1
-        if do_codes:
-          tbl.setItem(row, col, QTableWidgetItem(str(item[0])))
-          col = col + 1
-          
-        col = col+1
-
-        if col > col_cnt-1:
-          col = 0
-          row = row + 1
-    
-      tbl_sz = tbl.size()
-      tbl.setMaximumSize(tbl_sz)
-      tbl.setMinimumSize(tbl_sz)
-    
-      out_scale = min(rect.width()/tbl_sz.width(), rect.height()/tbl_sz.height())*0.95
-      painter.scale(out_scale, out_scale)
-      tbl.render(painter)
-
-    progress.setValue(3)
-    
-    # Handle descriptors
-    
-    # Show final size estimate
-    
-    
-    # Reprint key without names, but with codes (if requested) and lengths (if requested). Only do this if one of those options was requested
-    if (value.details["ColourNumbers"] or  value.details["LengthEstimates"]) and not progress.wasCanceled():
-      col_per = 2
-      if value.details["ColourNumbers"]:
-        col_per = col_per + 2
-      elif value.details["LengthEstimates"]:
-        col_per = col_per + 1
-
-      col_cnt = col_per * 3 - 1
-
-      rect = painter.viewport()
-
-      tbl = QTableWidget()
-      row = 0
-      col = 0
-      tbl.setColumnCount(col_cnt)
-      tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-
-      tbl.horizontalHeader().hide()
-      tbl.verticalHeader().hide()
-
-      for item in self.key:
-        tbl.setRowCount(row+1)
-
-        symMap = item[3].toqpixmap()
-        symMap = symMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
-        tbl.setItem(row, col, QTableWidgetItem())
-        widg = tbl.item(row, col)
-        widg.setIcon(QIcon(symMap))
-        col = col + 1
-
-        if value.details["ColourNumbers"]:
-          r, g, b = item[0][0:3] #Ignore alpha if present
-          colour = self.cChart.matchColour(colourItem(r, g, b))
-          tbl.setItem(row, col, QTableWidgetItem(colour.name))
-          col = col + 1
-          tbl.setItem(row, col, QTableWidgetItem(colour.num))
-          col = col + 1
-
-          symMap = makeSwatch(colour.rgb).toqpixmap()
-          symMap = symMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
-          tbl.setItem(row, col, QTableWidgetItem())
-          widg = tbl.item(row, col)
-          widg.setIcon(QIcon(symMap))
-          col = col + 1
-
-
-
-        if value.details["LengthEstimates"]:
-          length = str(round(estimateLength(self.full_image, item[0], value.details["Gauge"]), 1))+'m'
-          tbl.setItem(row, col, QTableWidgetItem(length))
-          col = col + 1
-
-        col = col+1
-
-        if col > col_cnt-1:
-          col = 0
-          row = row + 1
-    
-      tbl_sz = tbl.size()
-      tbl.setMaximumSize(tbl_sz)
-      tbl.setMinimumSize(tbl_sz)
-    
-      # Move down below previous table. 
-      painter.translate(0, tbl_sz.height())
-      tbl.render(painter)
-
-    progress.setValue(4)
-
-    
-    painter.end()
-    print("Pattern Complete")
-    
+    # self.key was filled last time image was changed
+    self.pGen.save(value.filename, value.details, self.full_image, self.key, self.cChart)
     
 def clearLayout(layout):
   # From https://stackoverflow.com/questions/4528347/clear-all-widgets-in-a-layout-in-pyqt  or https://stackoverflow.com/a/10067548
