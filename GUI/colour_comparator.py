@@ -15,39 +15,28 @@ import random
 class ColourComparator(QWidget):
   widget_file = files('GUI').joinpath('ColourComparator.ui')
 
-  def __init__(self, chart ="DMC"):
+  def __init__(self, chart ="DMC", nMatches=8):
     super(ColourComparator, self).__init__()
     uic.loadUi(self.widget_file, self) # Load the .ui file
     
     self.cChart = colourChart(chart)
-    self.setup_layout()
+    self.setup_layout(nMatches)
         
-  def setup_layout(self, inputColour=None, nMatches=8):
+  def setup_layout(self, nMatches):
     # Test - use some random colour
     # NOTE: shortcut keys will only work with up to 9 matches!
+
+    self.nMatches = nMatches
     
-    if not inputColour:
-      inputColour = tuple([int(random.random()*255) for i in range(3)])
-
-    self.iColourLabel.setText(_subs(self.iColourLabel.text(), str(inputColour)))
     self.matchLabel.setText(_subs(self.matchLabel.text(), self.cChart.brand))
-    self.gridLayout.addWidget(self.matchLabel, 0, 2, 1, 3)
 
-
-    r,g,b = inputColour
-    matches = self.cChart.matchColour(colourItem(r,g,b), nMatches)
-
-    for num, cMatch in enumerate(matches):
+    # Setup blank swatches, radio buttons and blank names
+    for num in range(self.nMatches):
 
       match = QLabel()
-      iSwatch = makeSwatch(cMatch.rgb)
-      
-      swatch = iSwatch.toqpixmap()
-      swatch = swatch.scaled(200, 50, qtc.Qt.IgnoreAspectRatio, qtc.Qt.FastTransformation)
-      match.setPixmap(swatch)
       self.gridLayout.addWidget(match, num+1, 1, 1, 2)
       match.adjustSize()
-      label = QLabel("{} - {}".format(cMatch.num, cMatch.name))
+      label = QLabel("")
       self.gridLayout.addWidget(label, num+1, 4, 1, 1)
       rButt = QRadioButton(self)
       rButt.setText(str(num+1)+')')
@@ -56,8 +45,15 @@ class ColourComparator(QWidget):
       rButt.clicked.connect(self.selected)
       self.gridLayout.addWidget(rButt, num+1, 3)
 
+  def show_colour(self, inputColour):
 
-    # Set input swatch and adjust to fit
+    self.iColourLabel.setText(_subs(self.iColourLabel.text(), str(inputColour)))
+
+    r,g,b = inputColour[0:3]
+    matches = self.cChart.matchColour(colourItem(r,g,b), self.nMatches)
+    self.lastMatches = matches
+
+    # Set input swatch and adjust to fit. This goes behind the match swatches
     iSwatch = makeSwatch(inputColour)  
     swatch = iSwatch.toqpixmap()
     swatch = swatch.scaled(250, 50*(len(matches)+2), qtc.Qt.IgnoreAspectRatio, qtc.Qt.FastTransformation)
@@ -68,9 +64,29 @@ class ColourComparator(QWidget):
     self.gridLayout.addWidget(self.inputSwatch, 1, 0, len(matches), 2)
     self.inputSwatch.adjustSize()
 
+    for num, cMatch in enumerate(matches):
+      iSwatch = makeSwatch(cMatch.rgb)
+      swatch = iSwatch.toqpixmap()
+      swatch = swatch.scaled(200, 50, qtc.Qt.IgnoreAspectRatio, qtc.Qt.FastTransformation)
+
+      match = self.gridLayout.itemAtPosition(num+1, 1).widget()
+      match.setPixmap(swatch)
+      match.adjustSize()
+
+      label = self.gridLayout.itemAtPosition(num+1, 4).widget()
+      label.setText("{} - {}".format(cMatch.num, cMatch.name))
+
+    # Reset radio button and set selection value
+    self.gridLayout.itemAtPosition(1,3).widget().setChecked(True)
+    self.lastSelection = 1
+    
 
   def selected(self, val):
     selection = int(self.sender().text().strip(')'))
+    self.lastSelection = selection
+
+  def get_selected(self):
+    return (self.lastSelection, self.lastMatches[self.lastSelection-1])
 
 def _subs(text, sub):
   # Substitue sub into text where FIRST <> are found. If there are more than one pair, can call repeatedly and will subs from left to right
