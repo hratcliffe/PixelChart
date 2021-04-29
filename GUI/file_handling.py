@@ -1,20 +1,19 @@
-from PyQt5 import uic, QtCore
-from PyQt5.QtWidgets import QApplication, QLabel, QDialog, QFileDialog
-import PyQt5.QtCore as qtc
+from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
+from PyQt5.uic import loadUi
+from PyQt5.QtWidgets import QDialog, QFileDialog
 
 from importlib_resources import files
 from copy import deepcopy
 
 from os import path
-import sys
 
 from .types import ImageStatePayload, PatternPayload, ImageSizePayload
 from .warnings import WarnDialog
 
-class FileLoader(qtc.QObject):
+class FileLoader(QObject):
 
-  save_triggered = qtc.pyqtSignal(str, name="save_triggered")
-  pattern_save_triggered = qtc.pyqtSignal(PatternPayload, name="pattern_save_triggered")
+  save_triggered = pyqtSignal(str, name="save_triggered")
+  pattern_save_triggered = pyqtSignal(PatternPayload, name="pattern_save_triggered")
 
   def __init__(self, window, fileH):
     super(FileLoader, self).__init__()
@@ -73,9 +72,9 @@ class FileLoader(qtc.QObject):
       self.pattern_save_triggered.emit(PatternPayload(filename, stuff))
 
 
-class FileDetailsHandler(qtc.QObject):
+class FileDetailsHandler(QObject):
 
-  image_resize_request = qtc.pyqtSignal(ImageSizePayload, name="image_resize_request")
+  image_resize_request = pyqtSignal(ImageSizePayload, name="image_resize_request")
 
   def __init__(self, window):
     super(FileDetailsHandler, self).__init__()
@@ -142,7 +141,7 @@ class FileDetailsHandler(qtc.QObject):
     return details
         
 
-#  @QtCore.pyqtSlot(ImageStatePayload)
+  @pyqtSlot(ImageStatePayload)
   def on_image_changed(self, value):
     self.set_resize_sliders(value.sz.width(), value.sz.height())
 
@@ -155,8 +154,8 @@ class FileExtras(QDialog):
   dialog_file = files('GUI').joinpath('ExtrasDialog.ui')
 
   def __init__(self, selections={}):
-    super(FileExtras, self).__init__() # Call the inherited classes __init__ method
-    uic.loadUi(self.dialog_file, self) # Load the .ui file
+    super(FileExtras, self).__init__()
+    loadUi(self.dialog_file, self)
     
     try:
       if selections["RGBCodes"]:

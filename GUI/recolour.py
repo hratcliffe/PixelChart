@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QLabel, QGridLayout, QPushButton
+from PyQt5.QtWidgets import QDialog, QGridLayout, QPushButton
 
 from .colour_comparator import ColourComparator
 from ColourHandling.interfaceRoutines import recolour

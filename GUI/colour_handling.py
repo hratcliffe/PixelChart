@@ -1,20 +1,12 @@
-from PyQt5 import uic, QtCore
-from PyQt5.QtWidgets import QApplication, QLabel, QDialog, QFileDialog
-import PyQt5.QtCore as qtc
-from importlib_resources import files
-from copy import deepcopy
+from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 
-from os import path
-import sys
-
-from ColourHandling.detect import mergeColours
 from .types import ImageStatePayload, ImageChangePayload
 from XStitchHeuristics.colours import listBrands
 
 _default_reduce_number = 20
 
-class ColourOptionsHandler(qtc.QObject):
-  image_change_request = qtc.pyqtSignal(ImageChangePayload, name="image_change_request")
+class ColourOptionsHandler(QObject):
+  image_change_request = pyqtSignal(ImageChangePayload, name="image_change_request")
 
   def __init__(self, window):
     super(ColourOptionsHandler, self).__init__()
@@ -32,7 +24,6 @@ class ColourOptionsHandler(qtc.QObject):
     self.window.current_cols.setText(str(num))
     self.window.colour_num_select.setMaximum(num)
     
-    #Recommended number default - allow m
     if num > _default_reduce_number:
       self.window.colour_num_select.setValue(_default_reduce_number)
     else:
@@ -48,7 +39,7 @@ class ColourOptionsHandler(qtc.QObject):
     self.image_change_request.emit(ImageChangePayload(num, opts=vals))
         
 
-#  @QtCore.pyqtSlot(ImageStatePayload)
+  @pyqtSlot(ImageStatePayload)
   def on_image_changed(self, value):
     self.set_num_colours(value.n_cols)
 

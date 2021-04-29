@@ -1,20 +1,19 @@
-from PyQt5.QtGui import QPixmap, QImage, QPainter, QFont, QIcon
-from PyQt5.QtWidgets import QGraphicsView, QGridLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView, QProgressDialog
-from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
-import PyQt5.QtCore as qtc
-from PyQt5.QtCore import QSize, QRect
+from PyQt5.QtGui import QFont
+from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
+from PyQt5.QtWidgets import QGridLayout, QLabel
 from PIL import ImageQt
 
+from ColourHandling import imageExt
+from ColourHandling.interfaceRoutines import *
 
-from ColourHandling import *
-from XStitchHeuristics import *
-from Graphics import *
-from .types import ImageStatePayload, ImageChangePayload
+from XStitchHeuristics.colours import colourChart
+from Graphics.pattern import PatternGenerator
+from .types import ImageStatePayload, ImageChangePayload, ImageSizePayload, PatternPayload
 from .warnings import PresaveDialog
 from .recolour import RecolourDialog
 
-class ImageHandler(qtc.QObject):
-  image_changed = qtc.pyqtSignal(ImageStatePayload, name="image_changed")
+class ImageHandler(QObject):
+  image_changed = pyqtSignal(ImageStatePayload, name="image_changed")
 
   def __init__(self, window):
     super(ImageHandler, self).__init__()
@@ -43,9 +42,9 @@ class ImageHandler(qtc.QObject):
     sz = pixmap.size()
     sz_b = pixmap.size()
     port_sz = self.pane.viewport().size()
-    sz.scale(port_sz, qtc.Qt.KeepAspectRatio)
+    sz.scale(port_sz, Qt.KeepAspectRatio)
     scl = 0.95  #Scale down slightly to accomodate borders and things
-    pixmap = pixmap.scaled(sz.width()*scl, sz.height()*scl, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+    pixmap = pixmap.scaled(sz.width()*scl, sz.height()*scl, Qt.KeepAspectRatio, Qt.FastTransformation)
 
     self.image_hook.setPixmap(pixmap)
     self.image_hook.adjustSize()
@@ -78,7 +77,7 @@ class ImageHandler(qtc.QObject):
       keyItem.setFont(QFont("Arial", 10))
       
       badgeMap = item[2].toqpixmap()
-      badgeMap = badgeMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+      badgeMap = badgeMap.scaled(50, 50, Qt.KeepAspectRatio, Qt.FastTransformation)
       keyBadge = QLabel()
       keyBadge.setPixmap(badgeMap)
       keyBadge.adjustSize()
@@ -120,23 +119,23 @@ class ImageHandler(qtc.QObject):
 
     return checkDialog.exec_() 
     
-  #  @QtCore.pyqtSlot(ImageChangePayload)
+  @pyqtSlot(ImageChangePayload)
   def on_image_change_request(self, value):
     self.modify_image(self.full_image, value)
 
-  #  @QtCore.pyqtSlot(ImageResizePayload)
+  @pyqtSlot(ImageSizePayload)
   def on_image_resize_request(self, value):
     self.resize_image(self.full_image, value)
 
 
-  #  @QtCore.pyqtSlot(str)
+  @pyqtSlot(str)
   def on_save_triggered(self, filename):
     try:
       self.full_image.save(filename)
     except:
       pass
 
-  #  @QtCore.pyqtSlot(PatternPayload)
+  @pyqtSlot(PatternPayload)
   def on_pattern_save_triggered(self, value):
     
     cont = self.pattern_checks(value.details)

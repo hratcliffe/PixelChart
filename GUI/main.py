@@ -1,20 +1,18 @@
-from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.uic import loadUi
+
 from importlib_resources import files
 from .file_handling import FileDetailsHandler, FileLoader
 from .image_display import ImageHandler
 from .colour_handling import ColourOptionsHandler
-from .types import *
-
-import sys
 
 class Ui(QMainWindow):
   main_window_file = files('GUI').joinpath('Main.ui')
 
   def __init__(self):
-    super(Ui, self).__init__() # Call the inherited classes __init__ method
-    uic.loadUi(self.main_window_file, self) # Load the .ui file
-    self.show() # Show the GUI
+    super(Ui, self).__init__()
+    loadUi(self.main_window_file, self)
+    self.show()
 
   # Fan out actions if needed
   def load_triggered(self, filename):
@@ -22,8 +20,8 @@ class Ui(QMainWindow):
 
 
 def run_app(args):
-  app = QApplication(args) # Create an instance of QtWidgets.QApplication
-  window = Ui() # Create an instance of our class
+  app = QApplication(args)
+  window = Ui()
 
   window.fileH = FileDetailsHandler(window)
   window.fileL = FileLoader(window, window.fileH)

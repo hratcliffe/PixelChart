@@ -1,15 +1,14 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QRadioButton
-from PyQt5 import uic
+from PyQt5.uic import loadUi
 from PyQt5.QtGui import QKeySequence
 from PyQt5 import QtCore as qtc
 
-from ColourHandling.interfaceRoutines import *
+from ColourHandling.interfaceRoutines import makeSwatch
 from XStitchHeuristics.colours import colourChart, colourItem
 
 from importlib_resources import files
-from PIL import ImageQt
-import re
-import random
+from PIL.ImageQt import toqpixmap
+from re import match as re_match
 
 # UI file assumes at least 2 matches will be offered, which is true in general
 class ColourComparator(QWidget):
@@ -17,13 +16,12 @@ class ColourComparator(QWidget):
 
   def __init__(self, chart ="DMC", nMatches=8):
     super(ColourComparator, self).__init__()
-    uic.loadUi(self.widget_file, self) # Load the .ui file
+    loadUi(self.widget_file, self) # Load the .ui file
     
     self.cChart = colourChart(chart)
     self.setup_layout(nMatches)
         
   def setup_layout(self, nMatches):
-    # Test - use some random colour
     # NOTE: shortcut keys will only work with up to 9 matches!
 
     self.nMatches = nMatches
@@ -92,7 +90,7 @@ def _subs(text, sub):
   # Substitue sub into text where FIRST <> are found. If there are more than one pair, can call repeatedly and will subs from left to right
 
   try:
-    res = re.match(r"(.*)<.*>(.*)", text)
+    res = re_match(r"(.*)<.*>(.*)", text)
     new_str = [res.group(1), sub, res.group(2)]
   
     return ''.join(new_str)
