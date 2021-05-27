@@ -95,6 +95,9 @@ class FileDetailsHandler(QObject):
     self.wid_adj_slider = window.wid_adj_slider
     self.wid_adj_slider.valueChanged.connect(self.wid_slider_changed)
     self.ht_adj_slider.valueChanged.connect(self.ht_slider_changed)
+    
+    # Set to 0 or higher for force aspect preserve, -ve will ignore any aspect locking. If 0 here, then wont be applied until first image is loaded
+    self.aspect_ratio = 0
 
   def extras_button_clicked(self):
     extrasDialog = FileExtras(self.extras_dict)
@@ -109,9 +112,22 @@ class FileDetailsHandler(QObject):
 
   def wid_slider_changed(self):
     self.set_resize_slider_labels(wid=self.wid_adj_slider.value())
+    if self.aspect_ratio > 0:
+      # DO NOT allow to emit value changed or will infinite loop
+      val = self.ht_adj_slider.blockSignals(True)
+      self.ht_adj_slider.setValue(self.wid_adj_slider.value()/self.aspect_ratio)
+      self.set_resize_slider_labels(ht=self.ht_adj_slider.value())
+      self.ht_adj_slider.blockSignals(val)
 
   def ht_slider_changed(self):
     self.set_resize_slider_labels(ht=self.ht_adj_slider.value())
+    if self.aspect_ratio > 0:
+      # DO NOT allow to emit value changed or will infinite loop
+      val = self.wid_adj_slider.blockSignals(True)
+      self.wid_adj_slider.setValue(self.ht_adj_slider.value()*self.aspect_ratio)
+      self.set_resize_slider_labels(wid=self.wid_adj_slider.value())
+      self.wid_adj_slider.blockSignals(val)
+
 
   def fill_filename(self, name):
     short_name = path.basename(name)
@@ -121,6 +137,8 @@ class FileDetailsHandler(QObject):
   def set_resize_sliders(self, wid, ht):
     self.window.wid_adj_slider.setValue(wid)
     self.window.ht_adj_slider.setValue(ht)
+
+    if self.aspect_ratio >= 0: self.aspect_ratio = wid/ht
     
   def set_resize_slider_labels(self, wid=None, ht=None):
 
