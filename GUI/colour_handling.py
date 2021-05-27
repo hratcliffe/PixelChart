@@ -60,7 +60,7 @@ def fill_colour_combos(window):
   window.optimize_select.addItem("Object", 'o')
   
   brands = listBrands()
-  window.palette_select.addItem("None", 'none')  
+  window.palette_select.addItem("None", None)  
   for item in brands:
     window.palette_select.addItem(item[0], item[1])
     

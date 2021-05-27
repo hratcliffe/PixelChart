@@ -9,6 +9,9 @@ class RecolourDialog(QDialog):
     super(RecolourDialog, self).__init__() 
     
     self.palette = palette
+    if self.palette is None:
+      return
+
     self.pickerWidget = ColourComparator(chart=palette)
     
     self.layout = QGridLayout()
@@ -35,6 +38,9 @@ class RecolourDialog(QDialog):
     
     
   def do_recolour(self, image):
+
+    if self.palette is None:
+      return
 
     cancel = False
  
