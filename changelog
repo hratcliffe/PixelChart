@@ -1,0 +1,7 @@
+28/5/21  - v0.1
+  First version with basic features:
+     GUI which can load images, resize and recolour
+     Recolour to fixed colour chart, with closest-match picker
+     Ability to save image
+     Ability to save a pattern with title, key, length and size estimates etc
+     More complex features unimplemented - no change tracking, undo, better image manipulation
