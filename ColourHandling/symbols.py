@@ -85,7 +85,5 @@ def getSymbol(id):
 
   loadSymbols()
 
-  if id < len(_symbols):
-    return _symbols[id]
-  else:
-    return _symbols[-1]
+  n_id = id%len(_symbols)  #Wrap round if out of range
+  return _symbols[n_id]
