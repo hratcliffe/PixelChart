@@ -19,3 +19,7 @@ class ImageSizePayload():
     self.width = wid
     self.height = ht
 
+class ColourRemapPayload():
+  def __init__(self, brand, remap):
+    self.brand = brand
+    self.remap = remap

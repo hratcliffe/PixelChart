@@ -1,9 +1,13 @@
 from PyQt5.QtWidgets import QDialog, QGridLayout, QPushButton
+from PyQt5.QtCore import pyqtSignal
 
 from .colour_comparator import ColourComparator
 from ColourHandling.interfaceRoutines import recolour
+from SharedData.types import ColourRemapPayload
 
 class RecolourDialog(QDialog):
+
+  image_recoloured = pyqtSignal(ColourRemapPayload, name="image_recoloured")
 
   def __init__(self, palette):
     super(RecolourDialog, self).__init__() 
@@ -63,6 +67,9 @@ class RecolourDialog(QDialog):
     if cancel:
       return
     else:
+      # Make changes to image
       recolour(image, selections)
+      # Emit details of changes
+      self.image_recoloured.emit(ColourRemapPayload(self.palette, selections))
+      
     
-

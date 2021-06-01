@@ -97,7 +97,11 @@ class ImageHandler(QObject):
     reduceColours(image, change_payload.n_cols)
 
     recolourD = RecolourDialog(change_payload.opts["Palette"])
+    recolourD.image_recoloured.connect(self.window.tracker.store)
     recolourD.do_recolour(image)
+    # Disconnect as recolourD should be destroyed now
+    recolourD.image_recoloured.disconnect(self.window.tracker.store)
+    
     self.change_image(image)
 
 

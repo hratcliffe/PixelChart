@@ -5,6 +5,7 @@ from importlib_resources import files
 from .file_handling import FileDetailsHandler, FileLoader
 from .image_display import ImageHandler
 from .colour_handling import ColourOptionsHandler
+from Tracker.change_logger import ChangeLoggerQt
 
 class Ui(QMainWindow):
   main_window_file = files('GUI').joinpath('Main.ui')
@@ -28,6 +29,8 @@ def run_app(args):
   window.imageH = ImageHandler(window)
   window.colourH = ColourOptionsHandler(window)
 
+  window.tracker = ChangeLoggerQt()
+
   cross_connect(window)
 
   app.exec_() # Start the application
@@ -45,4 +48,9 @@ def cross_connect(window):
   window.fileL.save_triggered.connect(window.imageH.on_save_triggered)
   window.fileL.pattern_save_triggered.connect(window.imageH.on_pattern_save_triggered)
 
-
+  # Connect up all necessary global ops. to tracker
+  # NOTE this is not ALL tracker connections!
+  window.colourH.image_change_request.connect(window.tracker.store)
+  window.fileH.image_resize_request.connect(window.tracker.store)
+  window.fileL.save_triggered.connect(window.tracker.store)
+  window.fileL.pattern_save_triggered.connect(window.tracker.store)
