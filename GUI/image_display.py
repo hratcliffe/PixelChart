@@ -8,7 +8,7 @@ from ColourHandling.interfaceRoutines import *
 
 from XStitchHeuristics.colours import colourChart
 from Graphics.pattern import PatternGenerator
-from .types import ImageStatePayload, ImageChangePayload, ImageSizePayload, PatternPayload
+from SharedData.types import *
 from .warnings import PresaveDialog
 from .recolour import RecolourDialog
 

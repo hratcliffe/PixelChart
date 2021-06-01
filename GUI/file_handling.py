@@ -7,7 +7,7 @@ from copy import deepcopy
 
 from os import path
 
-from .types import ImageStatePayload, PatternPayload, ImageSizePayload
+from SharedData.types import ImageStatePayload, PatternPayload, ImageSizePayload
 from .warnings import WarnDialog
 
 class FileLoader(QObject):

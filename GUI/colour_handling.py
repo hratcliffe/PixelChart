@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 
-from .types import ImageStatePayload, ImageChangePayload
+from SharedData.types import ImageStatePayload, ImageChangePayload
 from XStitchHeuristics.colours import listBrands
 
 _default_reduce_number = 20
