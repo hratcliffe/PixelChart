@@ -63,7 +63,6 @@ class RecolourDialog(QDialog):
     if cancel:
       return
     else:
-      for item in selections:
-        recolour(image, selections)
+      recolour(image, selections)
     
 
