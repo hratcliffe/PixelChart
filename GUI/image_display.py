@@ -15,14 +15,18 @@ from .recolour import RecolourDialog
 class ImageHandler(QObject):
   image_changed = pyqtSignal(ImageStatePayload, name="image_changed")
 
-  def __init__(self, window):
+  def __init__(self, window, has_display=True):
     super(ImageHandler, self).__init__()
     self.window = window
-    self.pane = window.image_pane
-    self.image_hook = window.image_hook
-    self.key_pane = window.key_box
+    self.has_display = has_display
+
+    if has_display:
+      self.pane = window.image_pane
+      self.image_hook = window.image_hook
+      self.key_pane = window.key_box
+      self.key_layout = None
+
     self.full_image = None
-    self.key_layout = None
     self.key = None
     self.pGen = PatternGenerator()
     
@@ -35,8 +39,10 @@ class ImageHandler(QObject):
     self.change_image(self.full_image)  
   
   def change_image(self, new_image):
-  
+    
     self.full_image = new_image
+
+    if not self.has_display: return
     
     pixmap = self.full_image.getImage(opt=False).toqpixmap()
     sz = pixmap.size()
@@ -57,6 +63,8 @@ class ImageHandler(QObject):
     self.image_changed.emit(ImageStatePayload(sz_b, im_cols))
     
   def show_key(self, changed = False):
+
+    if not self.has_display: return
 
     # Get new key
     if changed:
@@ -97,10 +105,16 @@ class ImageHandler(QObject):
     reduceColours(image, change_payload.n_cols)
 
     recolourD = RecolourDialog(change_payload.opts["Palette"])
-    recolourD.image_recoloured.connect(self.window.tracker.store)
+    try:
+      recolourD.image_recoloured.connect(self.window.tracker.store)
+    except:
+      pass
     recolourD.do_recolour(image)
     # Disconnect as recolourD should be destroyed now
-    recolourD.image_recoloured.disconnect(self.window.tracker.store)
+    try:
+      recolourD.image_recoloured.disconnect(self.window.tracker.store)
+    except:
+      pass
     
     self.change_image(image)
 

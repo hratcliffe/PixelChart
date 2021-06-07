@@ -8,15 +8,17 @@ _default_reduce_number = 20
 class ColourOptionsHandler(QObject):
   image_change_request = pyqtSignal(ImageChangePayload, name="image_change_request")
 
-  def __init__(self, window):
+  def __init__(self, window, has_display=True):
+
     super(ColourOptionsHandler, self).__init__()
 
     self.window = window
   
-    fill_colour_combos(window)
+    if has_display:
+      fill_colour_combos(window)
     
-    self.go_button = window.colour_go_button
-    self.go_button.clicked.connect(self.go_button_clicked) 
+      self.go_button = window.colour_go_button
+      self.go_button.clicked.connect(self.go_button_clicked) 
 
   def set_num_colours(self, num):
     # Shows current number and number to reduce to. Latter is capped at current number, and is set to lower of current and default
