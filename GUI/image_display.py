@@ -42,19 +42,22 @@ class ImageHandler(QObject):
     
     self.full_image = new_image
 
-    if not self.has_display: return
+    if self.has_display:
     
-    pixmap = self.full_image.getImage(opt=False).toqpixmap()
-    sz = pixmap.size()
-    sz_b = pixmap.size()
-    port_sz = self.pane.viewport().size()
-    sz.scale(port_sz, Qt.KeepAspectRatio)
-    scl = 0.95  #Scale down slightly to accomodate borders and things
-    pixmap = pixmap.scaled(sz.width()*scl, sz.height()*scl, Qt.KeepAspectRatio, Qt.FastTransformation)
+      pixmap = self.full_image.getImage(opt=False).toqpixmap()
+      sz = pixmap.size()
+      sz_b = pixmap.size()
+      port_sz = self.pane.viewport().size()
+      sz.scale(port_sz, Qt.KeepAspectRatio)
+      scl = 0.95  #Scale down slightly to accomodate borders and things
+      pixmap = pixmap.scaled(sz.width()*scl, sz.height()*scl, Qt.KeepAspectRatio, Qt.FastTransformation)
 
-    self.image_hook.setPixmap(pixmap)
-    self.image_hook.adjustSize()
-    self.image_hook.show()
+      self.image_hook.setPixmap(pixmap)
+      self.image_hook.adjustSize()
+      self.image_hook.show()
+
+    else:
+      sz_b = new_image.coreImage.size
 
     im_cols = len(self.full_image.colourCounts)
     self.show_key(True)
@@ -62,13 +65,14 @@ class ImageHandler(QObject):
     # Make sure this is backing image size, NOT pixmap size
     self.image_changed.emit(ImageStatePayload(sz_b, im_cols))
     
-  def show_key(self, changed = False):
+  def show_key(self, changed=False):
 
-    if not self.has_display: return
 
     # Get new key
     if changed:
       self.key = getKey(self.full_image)
+
+    if not self.has_display: return
 
     if self.key_layout is not None:
       clearLayout(self.key_layout)    
@@ -154,11 +158,12 @@ class ImageHandler(QObject):
       pass
 
   @pyqtSlot(PatternPayload)
-  def on_pattern_save_triggered(self, value):
+  def on_pattern_save_triggered(self, value, do_checks = True):
     
-    cont = self.pattern_checks(value.details)
-    if not cont:
-      return
+    if do_checks:
+      cont = self.pattern_checks(value.details)
+      if not cont:
+        return
 
     # self.key was filled last time image was changed
     self.pGen.save(value.filename, value.details, self.full_image, self.key, self.cChart)
