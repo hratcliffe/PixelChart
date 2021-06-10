@@ -1,3 +1,19 @@
+class ImageLoadPayload():
+  def __init__(self, filename):
+    self.filename = filename
+
+  def __str__(self):
+    return "ImageLoad: [filename={}".format(self.filename)
+
+  def __repr__(self):
+    return "ImageLoadPayload({})".format(self.filename)
+
+  def as_dict(self):
+    return {"name":"ImageLoadPayload", "filename":self.filename}
+
+  def to_json(self):
+    return self.as_dict()
+
 class ImageStatePayload():
   def __init__(self, sz, n_cols=-1):
     self.sz = sz
