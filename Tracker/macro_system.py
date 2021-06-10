@@ -24,6 +24,30 @@ class MacroLoader:
     with open(filename, 'r') as infile:
       items = json.load(infile)
     self.runner.run(items)
+
+  def get_names(self, filename):
+    # Attempt to extract LAST values for input and output filenames
+    # Our JSON is a list, so order IS guaranteed
+    with open(filename, 'r') as infile:
+      items = json.load(infile)
+    
+    for item in items[::-1]:
+      if item['name'] == 'PatternPayload':
+        break
+    for item2 in items[::-1]:
+      if item2['name'] == 'ImageLoadPayload':
+        break
+    try:
+      f2 = item2['filename']
+    except:
+      f2 = ""
+    try:
+      f1 = item['filename']
+    except:
+      f1 = ""
+    
+    return (f2, f1)
+
     
 #Any saveable macro item needs corresponding signal in this class
 class MacroRunnerQt(QObject):

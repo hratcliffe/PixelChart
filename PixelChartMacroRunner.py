@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.uic import loadUi
+from PyQt5.QtCore import pyqtSlot
 #Is QT application to use signalling system as the rest of the code does
 # This allows GUI for filename input and progress tracker etc
 
@@ -26,6 +27,16 @@ class Ui(QMainWindow):
       self.runner.run_file(self.macro_file.text(), showProgress=self.progress_check)
 
     self.imageH.full_image.show()
+    
+  @pyqtSlot()
+  def macro_entered(self):
+
+    input, output = self.runner.get_names(self.macro_file.text())
+    if not self.input_file.text():
+      self.input_file.setText(input)
+    if not self.output_file.text():
+      self.output_file.setText(output)
+
 
 def main(args):
 
@@ -42,6 +53,7 @@ def main(args):
   window.runner.runner.image_change_request.connect( window.imageH.on_image_change_request)
   window.runner.runner.image_resize_request.connect( window.imageH.on_image_resize_request)
 
+  window.macro_file.editingFinished.connect(window.macro_entered)
 
   app.exec_()
 
