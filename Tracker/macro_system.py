@@ -55,6 +55,7 @@ class MacroRunnerQt(QObject):
   image_changed = pyqtSignal(ImageStatePayload, name="image_changed")
   image_change_request = pyqtSignal(ImageChangePayload, name="image_change_request")
   image_resize_request = pyqtSignal(ImageSizePayload, name="image_resize_request")
+  pattern_save_request = pyqtSignal(PatternPayload, name="pattern_save_request")
 
   def __init__(self):
     super(MacroRunnerQt, self).__init__() 
@@ -73,6 +74,7 @@ class MacroRunnerQt(QObject):
           self.image_change_request.emit(payload)
         elif(item['name'] == "PatternPayload"):
           payload = PatternPayload(item['filename'], item['details'])
+          self.pattern_save_request.emit(payload)
         elif(item['name'] == "ImageSizePayload"):
           payload = ImageSizePayload(item['width'], item['height'])
           self.image_resize_request.emit(payload)

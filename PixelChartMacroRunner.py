@@ -44,7 +44,6 @@ def main(args):
   window = Ui()
 
   window.runner = MacroLoader()
-#  window.runner.run_file("test.json")
   window.run_button.clicked.connect(window.run_pressed)
 
   window.imageH = ImageHandler(window, has_display=False)
@@ -52,6 +51,7 @@ def main(args):
 
   window.runner.runner.image_change_request.connect( window.imageH.on_image_change_request)
   window.runner.runner.image_resize_request.connect( window.imageH.on_image_resize_request)
+  window.runner.runner.pattern_save_request.connect( window.imageH.on_pattern_save_triggered)
 
   window.macro_file.editingFinished.connect(window.macro_entered)
 
