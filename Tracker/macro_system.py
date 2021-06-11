@@ -1,4 +1,5 @@
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
+from PyQt5.QtWidgets import QProgressDialog
 
 from SharedData.types import *
 from GUI.image_display import ImageHandler
@@ -15,15 +16,21 @@ class MacroLoader:
     else:
       # Default runner
       self.runner = MacroRunnerQt()
-  
+        
   def run(self, items):
     self.runner.run(items)
 
-  def run_file(self, filename, showProgress=False):
+  def run_file(self, filename, progress_bar):
   
     with open(filename, 'r') as infile:
       items = json.load(infile)
-    self.runner.run(items)
+
+    progress_bar.setMaximum(len(items)+1)
+    progress_bar.setValue(1)
+
+    self.runner.run(items, progress_tracker=progress_bar)
+    
+    progress_bar.setValue(len(items)+1)
 
   def get_names(self, filename):
     # Attempt to extract LAST values for input and output filenames
@@ -57,7 +64,6 @@ class MacroLoader:
     self.runner.set_filename('input', filename)
 
 
-
 #Any saveable macro item needs corresponding signal in this class
 # Macro Runner needs to have suitable signals (for any runnable macro item) and also implement run method for list of items. It should also support over-riding filenames for input and patterns via set_filename(self, type, filename) method and store/use this
 class MacroRunnerQt(QObject):
@@ -79,11 +85,13 @@ class MacroRunnerQt(QObject):
     elif type == "input":
       self.input_file = filename
 
-  def run(self, items):
+  def run(self, items, progress_tracker=None):
   
     #If-else chain to identify which known operation we have, construct the appropriate Payload and invoke the appropriate signal. This way we can restrict to a specific set of objects that can be created
 
-    for item in items:
+    for num, item in enumerate(items):
+      if progress_tracker:
+        progress_tracker.setValue(num+1)
       try:
         if(item['name'] == "ImageStatePayload"):
           payload = ImageStatePayload(item['sz'], item['n_cols'])

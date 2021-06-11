@@ -28,7 +28,7 @@ class Ui(QMainWindow):
       #TODO This will always override - do only if changed?
       self.runner.set_pattern_name(self.output_file.text())
       
-      self.runner.run_file(self.macro_file.text(), showProgress=self.progress_check)
+      self.runner.run_file(self.macro_file.text(), self.progressBar)
 
       self.imageH.full_image.show()
     
