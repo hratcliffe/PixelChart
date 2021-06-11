@@ -24,9 +24,13 @@ class Ui(QMainWindow):
   
     if self.runner:
       self.imageH.show_image_from_file(self.input_file.text())
+
+      #TODO This will always override - do only if changed?
+      self.runner.set_pattern_name(self.output_file.text())
+      
       self.runner.run_file(self.macro_file.text(), showProgress=self.progress_check)
 
-    self.imageH.full_image.show()
+      self.imageH.full_image.show()
     
   @pyqtSlot()
   def macro_entered(self):

@@ -48,8 +48,18 @@ class MacroLoader:
     
     return (f2, f1)
 
-    
+  def set_pattern_name(self, filename):
+    # Set over-riding pattern file-name, which will be used instead of value from macros file    
+    self.runner.set_filename('pattern', filename)
+
+  def set_input_name(self, filename):
+    # Set over-riding input file-name, which will be used instead of value from macros file    
+    self.runner.set_filename('input', filename)
+
+
+
 #Any saveable macro item needs corresponding signal in this class
+# Macro Runner needs to have suitable signals (for any runnable macro item) and also implement run method for list of items. It should also support over-riding filenames for input and patterns via set_filename(self, type, filename) method and store/use this
 class MacroRunnerQt(QObject):
 
   image_changed = pyqtSignal(ImageStatePayload, name="image_changed")
@@ -59,6 +69,15 @@ class MacroRunnerQt(QObject):
 
   def __init__(self):
     super(MacroRunnerQt, self).__init__() 
+    self.pattern_file = None
+    self.input_file = None
+
+  def set_filename(self, type, filename):
+  
+    if type == "pattern":
+      self.pattern_file = filename
+    elif type == "input":
+      self.input_file = filename
 
   def run(self, items):
   
@@ -73,15 +92,19 @@ class MacroRunnerQt(QObject):
           payload = ImageChangePayload(item['n_cols'], item['opts'])          
           self.image_change_request.emit(payload)
         elif(item['name'] == "PatternPayload"):
-          payload = PatternPayload(item['filename'], item['details'])
+          if self.pattern_file:
+            filename = self.pattern_file
+          else:
+            filename = item['filename']
+          payload = PatternPayload(filename, item['details'])
           self.pattern_save_request.emit(payload)
         elif(item['name'] == "ImageSizePayload"):
           payload = ImageSizePayload(item['width'], item['height'])
           self.image_resize_request.emit(payload)
         elif(item['name'] == "ColourRemapPayload"):
+          # TODO what is sensible way to handle this? What would somebody want it to do?
           payload = ColourRemapPayload(item['brand'], item['remap'])
       except:
         # TODO better error here
         print("Error running macro step {}".format(item))
         return
-      print(payload)
