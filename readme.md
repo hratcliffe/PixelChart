@@ -4,14 +4,16 @@
 
 Turns a photo into a potential cross-stitch pattern, and generates a full featured pattern pdf.
 You can resize the image to a sensible size, manipulate the number of colours used and match
-them to popular brand colours. A loose description of the colour is given using a simple algorithm
+them to available colour palette. A loose description of the colour is given using a simple algorithm
 (which is very bad at characterising brown, its a work in progress), as well as (if selected)
-a colour name in specific brands.
+a colour name in specific brands if brand data is available.
 Final pattern files contain a colour image, an image with symbols plus key and guide lines and optionally
 thread colour codes with very approximate length estimates and a final size estimate in 3
 choices of gauge.
 
-Thread colour names and colours are approximate, and no association with any brand is implied.
+For specific brands, a file with names, RGB codes and hex codes is required.
+Approximate values for DMC are included. No affiliation implied!
+
 
 ## What is a "potential pattern"?
 
@@ -36,7 +38,7 @@ Longer term I might add
 Better patterns - larger colour blocks, reduced aliasing (long term goal)
 Backstitching suggestions
 
-U
+
 
 
 
