@@ -30,7 +30,6 @@ class FileLoader(QObject):
   
     loader = QFileDialog()
     loader.setFileMode(QFileDialog.ExistingFile)    
-    loader.show()
     if(loader.exec_()):
       filename = loader.selectedFiles()[0]
       self.details.fill_filename(filename)
