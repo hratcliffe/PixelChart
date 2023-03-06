@@ -39,8 +39,13 @@ def run_app(args):
 
   cross_connect(window)
 
+  # Test code
+  window.tracker.start()
+
   app.exec_() # Start the application
 
+  # Test code
+  window.tracker.write("test.json")
 
 def cross_connect(window):
 
