@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QRadioButton
 from PyQt5.uic import loadUi
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtGui import QKeySequence, QPixmap, QColor
 from PyQt5 import QtCore as qtc
 
 from ColourHandling.interfaceRoutines import makeSwatch
@@ -52,10 +52,8 @@ class ColourComparator(QWidget):
     self.lastMatches = matches
 
     # Set input swatch and adjust to fit. This goes behind the match swatches
-    iSwatch = makeSwatch(inputColour)  
-    swatch = iSwatch.toqpixmap()
-    swatch = swatch.scaled(250, 50*(len(matches)+2), qtc.Qt.IgnoreAspectRatio, qtc.Qt.FastTransformation)
-
+    swatch = QPixmap(250, 50*(len(matches)+2))
+    swatch.fill(QColor(r, g, b))
     self.inputSwatch.setPixmap(swatch)
 
     # Add widget will remove and re-add
@@ -63,10 +61,8 @@ class ColourComparator(QWidget):
     self.inputSwatch.adjustSize()
 
     for num, cMatch in enumerate(matches):
-      iSwatch = makeSwatch(cMatch.rgb)
-      swatch = iSwatch.toqpixmap()
-      swatch = swatch.scaled(200, 50, qtc.Qt.IgnoreAspectRatio, qtc.Qt.FastTransformation)
-
+      swatch = QPixmap(200, 50)
+      swatch.fill(QColor(cMatch.rgb[0], cMatch.rgb[1], cMatch.rgb[2]))
       match = self.gridLayout.itemAtPosition(num+1, 1).widget()
       match.setPixmap(swatch)
       match.adjustSize()

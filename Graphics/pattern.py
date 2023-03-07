@@ -124,7 +124,7 @@ class PatternGenerator:
 
     col_per = 2
     if do_colours:
-      col_per = col_per + 2
+      col_per = col_per + 3
     elif do_lengths:
       col_per = col_per + 1
 
