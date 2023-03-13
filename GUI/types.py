@@ -9,6 +9,11 @@ class ImageChangePayload():
     self.n_cols = n_cols
     self.opts = opts
 
+class ImageCombinePayload():
+  def __init__(self, original, new):
+    self.original = original
+    self.new = new
+
 class PatternPayload():
   def __init__(self, filename, details):
     self.filename = filename

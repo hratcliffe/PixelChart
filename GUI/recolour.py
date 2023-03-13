@@ -1,7 +1,9 @@
-from PyQt5.QtWidgets import QDialog, QGridLayout, QPushButton
+from PyQt5.QtWidgets import QDialog, QGridLayout, QPushButton, QVBoxLayout
 
 from .colour_comparator import ColourComparator
-from ColourHandling.interfaceRoutines import recolour
+from .colour_combiner import ColourPicker
+from ColourHandling.interfaceRoutines import recolour, recolourFromList
+from ColourHandling.colourDistances import *
 
 class RecolourDialog(QDialog):
 
@@ -65,4 +67,33 @@ class RecolourDialog(QDialog):
     else:
       recolour(image, selections)
     
+class CombinerDialog(QDialog):
+
+  def __init__(self, image, callback):
+    super(CombinerDialog, self).__init__() 
+    
+    self._colours = sorted(image.getColours(), key = lambda c: calculateDistanceRef(c)) # ToDO - colour value-y sort?
+    self._colourMap = {} #Key: Original colour, Val: List of those to combine
+    self._image = image
+
+    self.pickerWidget = ColourPicker(self._colours, callback)
+    
+    self.layout = QGridLayout()
+    self.layout.addWidget(self.pickerWidget, 0,0)
+    
+    self.done_butt = QPushButton()
+    self.done_butt.setText("Done")
+    self.layout.addWidget(self.done_butt, 1,1)
+        
+    self.setLayout(self.layout)
+
+    self.done_butt.clicked.connect(self.is_done)
+
+
+  def is_done(self):
+    self.close()
+    
+
+
+
 

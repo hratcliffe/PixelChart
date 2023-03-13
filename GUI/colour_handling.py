@@ -1,12 +1,14 @@
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 
-from .types import ImageStatePayload, ImageChangePayload
+from .types import ImageStatePayload, ImageChangePayload, ImageCombinePayload
 from XStitchHeuristics.colours import listBrands
+from .recolour import CombinerDialog
 
 _default_reduce_number = 20
 
 class ColourOptionsHandler(QObject):
   image_change_request = pyqtSignal(ImageChangePayload, name="image_change_request")
+  image_combine_request = pyqtSignal(ImageCombinePayload, name="image_combine_request")
 
   def __init__(self, window):
     super(ColourOptionsHandler, self).__init__()
@@ -17,6 +19,9 @@ class ColourOptionsHandler(QObject):
     
     self.go_button = window.colour_go_button
     self.go_button.clicked.connect(self.go_button_clicked) 
+
+    self.adv_button = window.colour_advanced_button
+    self.adv_button.clicked.connect(self.adv_button_clicked) 
 
   def set_num_colours(self, num):
     # Shows current number and number to reduce to. Latter is capped at current number, and is set to lower of current and default
@@ -37,7 +42,21 @@ class ColourOptionsHandler(QObject):
     vals = {"Emphasize": self.window.emphasize_select.currentData(), "Optimize": self.window.optimize_select.currentData(), "Palette":self.window.palette_select.currentData()}
     
     self.image_change_request.emit(ImageChangePayload(num, opts=vals))
-        
+
+  def combine_triggered(self, payload):
+    self.image_combine_request.emit(payload)
+
+  def adv_button_clicked(self):
+    # Start Advanced dialog
+    
+    # Create combiner callback
+    def callback(a):
+      return self.combine_triggered(a)
+
+    #Temporary - just start colour picker
+    advDialog = CombinerDialog(self.window.imageH.get_image(), callback)
+    advDialog.exec_()
+
 
   @pyqtSlot(ImageStatePayload)
   def on_image_changed(self, value):

@@ -99,6 +99,11 @@ class imageExt:
       im, counts = extractRunAndCounts(pixels, newIm.size)
       self.runImage = im
       self.colourCounts = counts
+  
+  
+  def getColours(self):
+    """ Get list of all colours in image"""
+    return list(self.colourMap[0].keys())
 
   def show(self):
   

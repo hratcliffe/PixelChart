@@ -8,7 +8,7 @@ from ColourHandling.interfaceRoutines import *
 
 from XStitchHeuristics.colours import colourChart
 from Graphics.pattern import PatternGenerator
-from .types import ImageStatePayload, ImageChangePayload, ImageSizePayload, PatternPayload
+from .types import ImageStatePayload, ImageChangePayload, ImageSizePayload, PatternPayload, ImageCombinePayload
 from .warnings import PresaveDialog
 from .recolour import RecolourDialog
 
@@ -28,6 +28,8 @@ class ImageHandler(QObject):
     
     self.cChart = colourChart()
 
+  def get_image(self):
+    return self.full_image
     
   def show_image_from_file(self, filename):
 
@@ -100,6 +102,12 @@ class ImageHandler(QObject):
     recolourD.do_recolour(image)
     self.change_image(image)
 
+  def modify_image_advanced(self, image, combine_payload):
+    """Modify the given image according to the given ImageCombinePayload"""
+  
+    recolourFromList(image, combine_payload.new, combine_payload.original)
+    self.change_image(image)
+    
 
   def resize_image(self, image, resize_payload):
     """Modify the given image according to the given ImageResizePayload"""
@@ -122,6 +130,10 @@ class ImageHandler(QObject):
   @pyqtSlot(ImageChangePayload)
   def on_image_change_request(self, value):
     self.modify_image(self.full_image, value)
+
+  @pyqtSlot(ImageCombinePayload)
+  def on_image_combine_request(self, value):
+    self.modify_image_advanced(self.full_image, value)
 
   @pyqtSlot(ImageSizePayload)
   def on_image_resize_request(self, value):

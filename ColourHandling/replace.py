@@ -30,7 +30,20 @@ def changeColours(originalImage, recolourMap ):
         # Skip any colour without remap instruction
         pass
   return originalImage 
-  
+
+def combineColoursFromList(originalImage, colourList, finalColour):
+  """Combine the colours given by colourList to a single value, finalColour
+  and return the image with this applied"""
+
+  pixels = originalImage.load()
+  sz = originalImage.size
+  for i in range(sz[0]):
+    for j in range(sz[1]):
+      if(pixels[i,j] in colourList):
+        pixels[i,j] = finalColour
+  return originalImage 
+
+
 def replaceColours(originalImage, colourToSymbolMap, colour1, colour2 ):
   """Create the image with colours replaced by symbols"""
 
