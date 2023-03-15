@@ -1,13 +1,16 @@
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
 
-from .types import ImageStatePayload, ImageChangePayload, ImageCombinePayload
+from .types import ImageStatePayload, ImageChangePayload, ImageCombinePayload, ImageEnhancePayload
 from XStitchHeuristics.colours import listBrands
 from .recolour import CombinerDialog
 
 _default_reduce_number = 20
+_default_enhance_base = 100
+_default_enhance_step = 0.1
 
 class ColourOptionsHandler(QObject):
   image_change_request = pyqtSignal(ImageChangePayload, name="image_change_request")
+  image_enhance_request = pyqtSignal(ImageEnhancePayload, name="image_enhance_request")
   image_combine_request = pyqtSignal(ImageCombinePayload, name="image_combine_request")
 
   def __init__(self, window):
@@ -19,6 +22,15 @@ class ColourOptionsHandler(QObject):
     
     self.go_button = window.colour_go_button
     self.go_button.clicked.connect(self.go_button_clicked) 
+
+    window.brightDown.clicked.connect(self.br_down)
+    window.brightUp.clicked.connect(self.br_up)
+
+    window.contDown.clicked.connect(self.co_down)
+    window.contUp.clicked.connect(self.co_up)
+
+    window.satDown.clicked.connect(self.sat_down)
+    window.satUp.clicked.connect(self.sat_up)
 
     self.adv_button = window.colour_advanced_button
     self.adv_button.clicked.connect(self.adv_button_clicked) 
@@ -42,6 +54,38 @@ class ColourOptionsHandler(QObject):
     vals = {"Emphasize": self.window.emphasize_select.currentData(), "Optimize": self.window.optimize_select.currentData(), "Palette":self.window.palette_select.currentData()}
     
     self.image_change_request.emit(ImageChangePayload(num, opts=vals))
+        
+  
+  def br_change(self, val):
+    # Emit request to change brightness
+    oldval = _default_enhance_base
+    newval = oldval*(1 + _default_enhance_step*val)
+    self.image_enhance_request.emit(ImageEnhancePayload("br", oldval, newval))
+
+  def br_down(self):
+    self.br_change(-1)
+  def br_up(self):
+    self.br_change(1)
+
+  def co_change(self, val):
+    # Emit request to change contrast
+    oldval = _default_enhance_base
+    newval = oldval*(1 + _default_enhance_step*val)
+    self.image_enhance_request.emit(ImageEnhancePayload("co", oldval, newval))
+  def co_down(self):
+    self.co_change(-1)
+  def co_up(self):
+    self.co_change(1)
+
+  def sat_change(self, val):
+    # Emit request to change saturation
+    oldval = _default_enhance_base
+    newval = oldval*(1 + _default_enhance_step*val)
+    self.image_enhance_request.emit(ImageEnhancePayload("sat", oldval, newval))
+  def sat_down(self):
+    self.sat_change(-1)
+  def sat_up(self):
+    self.sat_change(1)
 
   def combine_triggered(self, payload):
     self.image_combine_request.emit(payload)

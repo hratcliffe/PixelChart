@@ -3,6 +3,7 @@ from .detect import mergeColours
 from .replace import replaceColours, changeColours, addGuide, makeKeyItems, makeDummy, makeSwatchItem
 from .symbols import getUpscaling
 from .identify import nameColourLAB
+from .transform import *
 from .reduceColours import combineColours, getSimilarColours
 
 
@@ -16,6 +17,22 @@ def recolour(image, map):
 
   new_image = changeColours(image.getImage(False), map)
   image.setImage(new_image)
+
+def adjustBrightness(image, new_bright):
+  
+  new_image = modifyBrightness(image.getImage(False), new_bright)
+  image.setImage(new_image)
+
+def adjustContrast(image, new_contr):
+  
+  new_image = modifyContrast(image.getImage(False), new_contr)
+  image.setImage(new_image)
+
+def adjustSaturation(image, new_sat):
+  
+  new_image = modifySaturation(image.getImage(False), new_sat)
+  image.setImage(new_image)
+
 
 def recolourFromList(image, colourList, finalColour):
   new_image = combineColours(image.getImage(False), colourList, finalColour)

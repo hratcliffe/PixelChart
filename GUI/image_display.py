@@ -8,7 +8,7 @@ from ColourHandling.interfaceRoutines import *
 
 from XStitchHeuristics.colours import colourChart
 from Graphics.pattern import PatternGenerator
-from .types import ImageStatePayload, ImageChangePayload, ImageSizePayload, PatternPayload, ImageCombinePayload
+from .types import ImageStatePayload, ImageChangePayload, ImageSizePayload, PatternPayload, ImageCombinePayload, ImageEnhancePayload
 from .warnings import PresaveDialog
 from .recolour import RecolourDialog
 
@@ -102,6 +102,27 @@ class ImageHandler(QObject):
     recolourD.do_recolour(image)
     self.change_image(image)
 
+  def enhance_image(self, image, enhance_payload):
+    """Modify the given image according to the given ImageEnhancePayload"""
+
+    # Simple divide-by-zero protection below so use this if to ensure no change in value -> no change in image
+    if(enhance_payload.newValue == enhance_payload.oldValue): return
+
+    # TODO sensible scaling from say 0.1 to 10x???
+    if(enhance_payload.attr == "br"):
+        new_bright = enhance_payload.newValue/(enhance_payload.oldValue+1)
+        adjustBrightness(image, new_bright)
+    elif(enhance_payload.attr == "co"):
+        new_con = enhance_payload.newValue/(enhance_payload.oldValue+1)
+        adjustContrast(image, new_con)
+    elif(enhance_payload.attr == "sat"):
+        new_sat = enhance_payload.newValue/(enhance_payload.oldValue+1)
+        adjustSaturation(image, new_sat)
+    else:
+        raise ValueError("Invalid enhancement {}".format(enhance_payload.attr))
+
+    self.change_image(image)
+
   def modify_image_advanced(self, image, combine_payload):
     """Modify the given image according to the given ImageCombinePayload"""
   
@@ -131,6 +152,9 @@ class ImageHandler(QObject):
   def on_image_change_request(self, value):
     self.modify_image(self.full_image, value)
 
+  @pyqtSlot(ImageEnhancePayload)
+  def on_image_enhance_request(self, value):
+    self.enhance_image(self.full_image, value)
   @pyqtSlot(ImageCombinePayload)
   def on_image_combine_request(self, value):
     self.modify_image_advanced(self.full_image, value)

@@ -24,3 +24,8 @@ class ImageSizePayload():
     self.width = wid
     self.height = ht
 
+class ImageEnhancePayload():
+  def __init__(self, attr, old, new):
+    self.attr = attr
+    self.oldValue = old
+    self.newValue = new
