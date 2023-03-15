@@ -150,7 +150,8 @@ class ImageHandler(QObject):
     
   @pyqtSlot(ImageChangePayload)
   def on_image_change_request(self, value):
-    self.modify_image(self.full_image, value)
+    if self.full_image:
+      self.modify_image(self.full_image, value)
 
   @pyqtSlot(ImageEnhancePayload)
   def on_image_enhance_request(self, value):
@@ -161,7 +162,8 @@ class ImageHandler(QObject):
 
   @pyqtSlot(ImageSizePayload)
   def on_image_resize_request(self, value):
-    self.resize_image(self.full_image, value)
+    if self.full_image:
+      self.resize_image(self.full_image, value)
 
 
   @pyqtSlot(str)
