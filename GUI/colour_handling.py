@@ -91,7 +91,10 @@ class ColourOptionsHandler(QObject):
     self.image_combine_request.emit(payload)
 
   def adv_button_clicked(self):
-    # Start Advanced dialog
+    # Start Advanced dialog if there is an image
+    
+    if(not self.window.imageH.check_for_image()):
+      return
     
     # Create combiner callback
     def callback(a):

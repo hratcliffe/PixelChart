@@ -28,8 +28,14 @@ class ImageHandler(QObject):
     
     self.cChart = colourChart()
 
+  def check_for_image(self):
+    return self.full_image is not None
+  
   def get_image(self):
-    return self.full_image
+    if(self.full_image):
+      return self.full_image
+    else:
+      raise ValueError
     
   def show_image_from_file(self, filename):
 
@@ -152,14 +158,14 @@ class ImageHandler(QObject):
   def on_image_change_request(self, value):
     if self.full_image:
       self.modify_image(self.full_image, value)
-
   @pyqtSlot(ImageEnhancePayload)
   def on_image_enhance_request(self, value):
-    self.enhance_image(self.full_image, value)
+    if self.full_image:
+      self.enhance_image(self.full_image, value)
   @pyqtSlot(ImageCombinePayload)
   def on_image_combine_request(self, value):
-    self.modify_image_advanced(self.full_image, value)
-
+    if self.full_image:
+      self.modify_image_advanced(self.full_image, value)
   @pyqtSlot(ImageSizePayload)
   def on_image_resize_request(self, value):
     if self.full_image:
