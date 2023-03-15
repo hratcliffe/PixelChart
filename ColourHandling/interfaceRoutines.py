@@ -1,10 +1,9 @@
 from . import imageExt
-from .detect import mergeColours
 from .replace import replaceColours, changeColours, addGuide, makeKeyItems, makeDummy, makeSwatchItem
 from .symbols import getUpscaling
 from .identify import nameColourLAB
 from .transform import *
-from .reduceColours import combineColours, getSimilarColours
+from .reduceColours import combineColours, getSimilarColours, mergeColours
 
 
 def reduceColours(image, n_cols, opt=False):
