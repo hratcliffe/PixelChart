@@ -19,8 +19,9 @@ def buildTreeDirect(lst):
   sTree = KDTree(lst)
   return searcher(sTree, lst, '')
 
+# TODO shouldn't the above be init options for searcher object??
 class searcher:
-
+  """Class implementing search on prebuilt KDTree"""
   def __init__(self, tree, items, dataProp):
     self.tree = tree
     self.items = items

@@ -1,3 +1,4 @@
+# Module dealing with metrics for distances between colour values
 from math import sqrt
 
 def calculateDistanceRef(colour):

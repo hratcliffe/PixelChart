@@ -1,3 +1,4 @@
+# Module defining imageExt class and some simple functions it needs
 from . import detect, replace
 from .image_helpers import imageModeHelper
 

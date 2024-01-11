@@ -10,16 +10,23 @@ from ColourHandling import *
 from XStitchHeuristics import *
 
 class PatternGenerator:
-
+  """ Create a pattern output.
+  This checks for validity of pattern to produce and warns of suspicious stuff
+  (image too large, too many colours for sensible pattern)
+  """
   def __init__(self):
+    # Maximum size of image to consider "normal"
     self.max_sz = (200, 200)
+    # Maximum number of colours to consider normal. Should be less than maximum number
+    # of distinct symbols available for symbolic pattern
     self.max_colours = 50
-    
+
     self.o_scl = 0.8
 
   def checks(self, details, im_sz, im_cols):
-    # Show pattern details and verify anything "suspicious"
-            
+    """ Summarize pattern details and produce warnings for anything suspicious
+    """
+
     warnings = []
 
     if im_sz[0] > self.max_sz[0] or im_sz[1] > self.max_sz[1]:
@@ -27,7 +34,7 @@ class PatternGenerator:
 
     if im_cols > self.max_colours:
       warnings.append("Number of colours is very large ({}). Symbolic pattern will have repeats!".format(im_cols))
-      
+
     setts = []
 
     if details["Symbols"]:
@@ -45,7 +52,7 @@ class PatternGenerator:
       setts.append("Producing Final Size at Gauge {}".format(details["Gauge"]))
     if details["LengthEstimates"]:
       setts.append("Producing Thread Length Estimates at Gauge {}".format(details["Gauge"]))
-    
+
     if not setts:
       setts.append("No Settings To Report")
 
@@ -55,7 +62,7 @@ class PatternGenerator:
     return {"settings":setts, "warnings":warnings}
 
   def rescale_to_page(self, pixmap, o_sz):
-
+    """Rescale image ensuring pixelation retained"""
     sz = pixmap.size()
     sz.scale(o_sz, qtc.Qt.KeepAspectRatio)
     sz = sz*self.o_scl
@@ -64,12 +71,15 @@ class PatternGenerator:
 
 
   def get_size_text(self, im_sz, gg):
+    """Create message summarizing piece pattern would create"""
 
     sz = estimateSize(im_sz, gg)
     mess = "{} by {} stitches, approx {}cm by {}cm at gauge {}".format(im_sz[0], im_sz[1], round(sz['cm'][0], 1), round(sz['cm'][1], 1), gg)
     return mess
 
   def make_key_table(self, do_codes, key):
+    """Create a table for the colours in given key, including RGB codes if do_codes is set
+    """
 
     if do_codes:
       #4 items, 2 sets, plus one padding
@@ -89,7 +99,7 @@ class PatternGenerator:
 
     for item in key:
       tbl.setRowCount(row+1)
-      
+
       tbl.setItem(row, col, QTableWidgetItem(" ".join(item[4])))
       col = col + 1
 
@@ -121,6 +131,11 @@ class PatternGenerator:
     return tbl
 
   def make_colour_table(self, do_colours, do_lengths, image, key, cChart, gauge):
+    """Create a table for the colours in given key, including colour names and
+    estimates of length required if do_colours and do_lengths are true respectively.
+    Colour names require a cChart mapping RGB codes to names
+    Lengths requires the image (to count pixels) and a gauge selection (to size stitches)
+    """
 
     col_per = 2
     if do_colours:
@@ -141,7 +156,6 @@ class PatternGenerator:
 
     for item in key:
       tbl.setRowCount(row+1)
-
 
       symMap = item[3].toqpixmap().scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
       tbl.setItem(row, col, QTableWidgetItem())
@@ -172,7 +186,7 @@ class PatternGenerator:
       if col > col_cnt-1:
         col = 0
         row = row + 1
-    
+
     tbl_sz = tbl.size()
     tbl.setMaximumSize(tbl_sz)
     tbl.setMinimumSize(tbl_sz)
@@ -181,19 +195,20 @@ class PatternGenerator:
 
 
   def save(self, filename, details, image, key, cChart):
-        
+    """Save a pattern file as PDF, with options as given in details dict"""
+
     progress = QProgressDialog("Saving Pattern", "Abort", 0, 4)
     progress.setWindowModality(qtc.Qt.WindowModal)
     progress.forceShow()
-                    
+
     printer = QPrinter(QPrinter.HighResolution)
     printer.setOutputFormat(QPrinter.PdfFormat)
     printer.setOutputFileName(filename)
-    
+
     painter = QPainter()
     painter.begin(printer)
     # Colour image
-    
+
     rect = painter.viewport()
     o_sz = rect.size()
 
@@ -211,9 +226,9 @@ class PatternGenerator:
     # Move down. If landscape, will centre in width, portrait will centre in height. Other dimension will still fit
     painter.translate(o_sz.width()*(1-self.o_scl)/2, o_sz.height()*(1-self.o_scl)/2)
     painter.drawPixmap(rect, pixmap)
-    
+
     progress.setValue(1)
-    
+
     if details["Symbols"] and not progress.wasCanceled():
       printer.newPage()
 

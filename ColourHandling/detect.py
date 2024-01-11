@@ -1,3 +1,4 @@
+# Experimental feature detection module
 from . import imageExt
 
 from sklearn.cluster import KMeans

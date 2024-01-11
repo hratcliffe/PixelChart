@@ -1,24 +1,28 @@
+# Module handling mechanical process of colour replacement
 from . import symbols
 from .image_helpers import imageModeHelper
 
 from PIL import Image
 
 def mapColours(colours):
-  """ Create maps between colours and IDs. IDs can then be mapped to symbols"""
+  """ Create maps between colours and a unique ID from 0 to total number of colours
+  Both forward (key is colour, value is ID) and backward (key is ID, value is colour)
+  are created and a tuple of the two is returned.
+  """
 
-  n_colours = len(colours)
-  
   fw_map = {}
   bk_map = {}
 
   for cnt, item in enumerate(colours):
     fw_map[item] = cnt
     bk_map[cnt] = item
-  
+
   return (fw_map, bk_map)
 
 def changeColours(originalImage, recolourMap ):
-  """Create the image with colours remapped as in recolourMap"""
+  """Modify given image so that all pixels colours are remapped as in recolourMap
+  Recolour map should be a map from one colour value to a new one (recolourMap[originalColour]=newColour)
+  """
 
   pixels = originalImage.load()
   sz = originalImage.size
@@ -29,11 +33,12 @@ def changeColours(originalImage, recolourMap ):
       except:
         # Skip any colour without remap instruction
         pass
-  return originalImage 
+  return originalImage
 
 def combineColoursFromList(originalImage, colourList, finalColour):
-  """Combine the colours given by colourList to a single value, finalColour
-  and return the image with this applied"""
+  """Modify image so that all pixels with colour in colourList
+  are recoloured to a single value, finalColour
+  """
 
   pixels = originalImage.load()
   sz = originalImage.size
@@ -41,11 +46,15 @@ def combineColoursFromList(originalImage, colourList, finalColour):
     for j in range(sz[1]):
       if(pixels[i,j] in colourList):
         pixels[i,j] = finalColour
-  return originalImage 
+  return originalImage
 
 
 def replaceColours(originalImage, colourToSymbolMap, colour1, colour2 ):
-  """Create the image with colours replaced by symbols"""
+  """Create the image with colours replaced by symbols
+  Returns a new image of larger size to accomodate multi-pixels needed for symbols
+  colour1 is the background colour, colour2 is the foreground colour for symbols
+  See symbols module for upscaling and symbol definitions
+  """
 
   symbols.loadSymbols()
   #Upscale image - scaling dicatated by symbols code
@@ -74,8 +83,7 @@ def replaceColours(originalImage, colourToSymbolMap, colour1, colour2 ):
   for j in range(new_sz[1]):
     pixels[0, j] = colour2
     pixels[new_sz[0]-1, j] = colour2
-    
-        
+
   return imNew
 
 def drawSymbolInPlace(image, symId, colour1, colour2, outline=False):
@@ -135,7 +143,7 @@ def addGuide(imageIn, spacing, style, colour):
           except:
             pass
       elif style =='a':
-        line = int(spacing/3)        
+        line = int(spacing/3)
         dist = int(spacing/2)
         for ii in range(-dist, dist):
           if int(ii/line)%2 == 0:
@@ -160,13 +168,13 @@ def makeKeyItems(colourToSymbolMap, bg_col, fg_col, mode='RGB', outline=True):
   limit_num = 100
 
   els = []
-  
+
   scale_sz = symbols.getUpscaling()
   blob_sz = (scale_sz+1, scale_sz+1)
 
   cnt = 0
   for key in colourToSymbolMap:
-    
+
     cIm = Image.new(mode, blob_sz, key)
     sIm = Image.new(mode, blob_sz, bg_col)
     drawSymbolInPlace(sIm, colourToSymbolMap[key], bg_col, fg_col, outline=outline)
@@ -176,7 +184,7 @@ def makeKeyItems(colourToSymbolMap, bg_col, fg_col, mode='RGB', outline=True):
     cnt = cnt + 1
     if cnt > limit_num:
       break
-  
+
 
   return els
 
@@ -188,18 +196,18 @@ def makeSwatchItem(colour, mode='RGB', outline=True):
   blob_sz = (scale_sz+1, scale_sz+1)
 
   return Image.new(mode, blob_sz, colour)
-  
+
 def makeDummy(colourMap):
 
   width=len(colourMap)
   dummy = Image.new('RGB', (width, 1), (255, 255, 255))
-  
+
   pix = dummy.load()
   cnt = 0
   for item in colourMap:
     pix[cnt, 0] = item
     cnt = cnt+1
-    
+
   imageHelper = imageModeHelper()
   return imageHelper.changeMode(dummy, "RGB", "LAB")
-    
+

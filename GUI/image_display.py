@@ -12,6 +12,8 @@ from .types import ImageStatePayload, ImageChangePayload, ImageSizePayload, Patt
 from .warnings import PresaveDialog
 from .recolour import RecolourDialog
 
+# TODO This is a bit of a God object. Should some functions be delegated to something else?
+
 class ImageHandler(QObject):
   image_changed = pyqtSignal(ImageStatePayload, name="image_changed")
 
