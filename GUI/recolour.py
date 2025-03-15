@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QGridLayout, QPushButton, QVBoxLayout
+from PyQt6.QtWidgets import QDialog, QGridLayout, QPushButton, QVBoxLayout
 
 from .colour_comparator import ColourComparator
 from .colour_combiner import ColourPicker
@@ -59,7 +59,7 @@ class RecolourDialog(QDialog):
     selections = {}
     for colour in image.colourMap[0].keys():
       self.pickerWidget.show_colour(colour)
-      res = self.exec_() # Call once per colour and grab selection each time
+      res = self.exec() # Call once per colour and grab selection each time
       if res:
         choice = self.pickerWidget.get_selected()
         selections[colour] = choice[1].rgb

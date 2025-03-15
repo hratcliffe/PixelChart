@@ -30,7 +30,7 @@ class imageExt:
   def resize(self, width, height):
   
     
-    new_image = self.coreImage.resize((width, height), Image.ANTIALIAS)
+    new_image = self.coreImage.resize((width, height), Image.Resampling.LANCZOS)
     self.setImage(new_image)
 
     
