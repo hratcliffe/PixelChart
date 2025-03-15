@@ -54,7 +54,7 @@ class ImageHandler(QObject):
     port_sz = self.pane.viewport().size()
     sz.scale(port_sz, Qt.KeepAspectRatio)
     scl = 0.95  #Scale down slightly to accomodate borders and things
-    pixmap = pixmap.scaled(sz.width()*scl, sz.height()*scl, Qt.KeepAspectRatio, Qt.FastTransformation)
+    pixmap = pixmap.scaled(int(sz.width()*scl), int(sz.height()*scl), Qt.KeepAspectRatio, Qt.FastTransformation)
 
     self.image_hook.setPixmap(pixmap)
     self.image_hook.adjustSize()

@@ -60,7 +60,7 @@ def replaceColours(originalImage, colourToSymbolMap, colour1, colour2 ):
   #Upscale image - scaling dicatated by symbols code
   scale = symbols.getUpscaling()
   sz = originalImage.size
-  new_sz = [el * scale for el in sz]
+  new_sz = [el * scale+1 for el in sz]
 
   imNew = Image.new(originalImage.mode, new_sz, colour1)
   pixels = imNew.load()
@@ -72,9 +72,9 @@ def replaceColours(originalImage, colourToSymbolMap, colour1, colour2 ):
       except:
         symId = -1
       symbol = symbols.getSymbol(symId)
-      
+
       for loc in symbol.locs:
-        pixels[i*scale + loc[0]+1, j*scale + loc[1]+1] = colour2
+        pixels[int(i*scale) + loc[0]+1, int(j*scale) + loc[1]+1] = colour2
 
   # Enclosing box
   for i in range(new_sz[0]):

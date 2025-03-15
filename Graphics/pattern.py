@@ -67,7 +67,7 @@ class PatternGenerator:
     sz.scale(o_sz, qtc.Qt.KeepAspectRatio)
     sz = sz*self.o_scl
     # Must scale pixmap manually to ensure transform is fast style, to retain pixelation
-    return pixmap.scaled(sz.width()*self.o_scl, sz.height()*self.o_scl, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+    return pixmap.scaled(int(sz.width()*self.o_scl), int(sz.height()*self.o_scl), qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
 
 
   def get_size_text(self, im_sz, gg):
@@ -115,15 +115,15 @@ class PatternGenerator:
       col = col + 1
 
       if do_codes:
-        tbl.setItem(row, col, QTableWidgetItem(str(item[0])))
+        tbl.setItem(row, col, QTableWidgetItem(str(item[0][0:3])))
         col = col + 1
-          
+
       col = col+1
 
       if col > col_cnt-1:
         col = 0
         row = row + 1
-    
+
     tbl_sz = tbl.size()
     tbl.setMaximumSize(tbl_sz)
     tbl.setMinimumSize(tbl_sz)
@@ -140,16 +140,17 @@ class PatternGenerator:
     col_per = 2
     if do_colours:
       col_per = col_per + 3
-    elif do_lengths:
+    if do_lengths:
       col_per = col_per + 1
 
-    col_cnt = col_per * 3 - 1
+    col_cnt = col_per * 2 - 1
 
     tbl = QTableWidget()
     row = 0
     col = 0
     tbl.setColumnCount(col_cnt)
     tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+    tbl.horizontalHeader().setStretchLastSection(True)
 
     tbl.horizontalHeader().hide()
     tbl.verticalHeader().hide()
@@ -213,18 +214,18 @@ class PatternGenerator:
     o_sz = rect.size()
 
     # Draw title and header text
-    painter.drawText(QRect(0, 0, o_sz.width(), o_sz.height()/40), qtc.Qt.AlignCenter, details["PTitle"])
-    painter.drawText(QRect(0, o_sz.height()/40, o_sz.width(), o_sz.height()/20), qtc.Qt.AlignCenter, details["PText"])
+    painter.drawText(QRect(0, 0, o_sz.width(), int(o_sz.height()/40)), qtc.Qt.AlignCenter, details["PTitle"])
+    painter.drawText(QRect(0, int(o_sz.height()/40), o_sz.width(), int(o_sz.height()/20)), qtc.Qt.AlignCenter, details["PText"])
 
     if details["FinalSize"]:
       mess = self.get_size_text(image.getImage(opt=False).size, details["Gauge"])
-      painter.drawText(QRect(0, o_sz.height()/20, o_sz.width(), 3*o_sz.height()/40), qtc.Qt.AlignCenter, mess)
+      painter.drawText(QRect(0, int(o_sz.height()/20), o_sz.width(), int(3*o_sz.height()/40)), qtc.Qt.AlignCenter, mess)
 
     # Colour image
     pixmap = self.rescale_to_page(image.getImage(opt=False).toqpixmap(), o_sz)
     rect.setSize(pixmap.size())
     # Move down. If landscape, will centre in width, portrait will centre in height. Other dimension will still fit
-    painter.translate(o_sz.width()*(1-self.o_scl)/2, o_sz.height()*(1-self.o_scl)/2)
+    painter.translate(int(o_sz.width()*(1-self.o_scl)/2), int(o_sz.height()*(1-self.o_scl)/2))
     painter.drawPixmap(rect, pixmap)
 
     progress.setValue(1)
@@ -236,38 +237,43 @@ class PatternGenerator:
       pixmap = self.rescale_to_page(toSymbolicImage(image).getImage(opt=False).toqpixmap(), o_sz)
       rect.setSize(pixmap.size())
       painter.drawPixmap(rect, pixmap)
-    
+
     progress.setValue(2)
 
     if details["Key"] or details["ColourNumbers"] or details["LengthEstimates"]:
       printer.newPage()
 
-    # Create key    
+    # Create key
+    k_tbl_sz = None
     if details["Key"] and not progress.wasCanceled():
-    
+      # Seem to need this save and restore to get both tables - This suggests a bug?
+      painter.save()
       tbl = self.make_key_table(details["RGBCodes"], key)
       tbl_sz = tbl.size()
-    
+      k_tbl_sz = tbl_sz
       out_scale = min(rect.width()/tbl_sz.width(), rect.height()/tbl_sz.height())*0.95
       painter.scale(out_scale, out_scale)
       tbl.render(painter)
-
+      painter.restore()
     progress.setValue(3)
-    
+
     # Handle descriptors
-    
+
     # Reprint key without names, but with codes (if requested) and lengths (if requested). Only do this if one of those options was requested
     if (details["ColourNumbers"] or details["LengthEstimates"]) and not progress.wasCanceled():
-    
+
       tbl = self.make_colour_table(details["ColourNumbers"], details["LengthEstimates"], image, key, cChart, details["Gauge"])
       tbl_sz = tbl.size()
-      # Move down below previous table. 
-      painter.translate(0, tbl_sz.height())
+      # Move down below previous table.
+      out_scale = min(rect.width()/tbl_sz.width(), rect.height()/tbl_sz.height())*0.95
+      painter.scale(out_scale, out_scale)
+      if(k_tbl_sz is not None):
+          painter.translate(0, k_tbl_sz.height())
       tbl.render(painter)
 
     progress.setValue(4)
 
-    
+
     painter.end()
     print("Pattern Complete")
-    
+

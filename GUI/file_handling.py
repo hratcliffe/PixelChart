@@ -133,7 +133,7 @@ class FileDetailsHandler(QObject):
     if self.aspect_ratio > 0:
       # DO NOT allow to emit value changed or will infinite loop
       val = self.ht_adj_slider.blockSignals(True)
-      self.ht_adj_slider.setValue(self.wid_adj_slider.value()/self.aspect_ratio)
+      self.ht_adj_slider.setValue(int(self.wid_adj_slider.value()/self.aspect_ratio))
       self.set_resize_slider_labels(ht=self.ht_adj_slider.value())
       self.ht_adj_slider.blockSignals(val)
 
@@ -146,7 +146,7 @@ class FileDetailsHandler(QObject):
     if self.aspect_ratio > 0:
       # DO NOT allow to emit value changed or will infinite loop
       val = self.wid_adj_slider.blockSignals(True)
-      self.wid_adj_slider.setValue(self.ht_adj_slider.value()*self.aspect_ratio)
+      self.wid_adj_slider.setValue(int(self.ht_adj_slider.value()*self.aspect_ratio))
       self.set_resize_slider_labels(wid=self.wid_adj_slider.value())
       self.wid_adj_slider.blockSignals(val)
 
