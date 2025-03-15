@@ -1,3 +1,4 @@
+# Module defining imageExt class and some simple functions it needs
 from . import detect, replace
 from .image_helpers import imageModeHelper
 
@@ -99,6 +100,11 @@ class imageExt:
       im, counts = extractRunAndCounts(pixels, newIm.size)
       self.runImage = im
       self.colourCounts = counts
+  
+  
+  def getColours(self):
+    """ Get list of all colours in image"""
+    return list(self.colourMap[0].keys())
 
   def show(self):
   

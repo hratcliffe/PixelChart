@@ -2,6 +2,8 @@ from math import sqrt
 
 from ColourHandling import imageExt
 
+# TODO make this a class, remove globals
+
 _perStitch = None  # Approx m per stitch thread for common gauges
 _strandingMultiplier = None # How many lengths from a 6 strand piece (6/n_strands)
 

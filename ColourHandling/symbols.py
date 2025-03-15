@@ -1,3 +1,4 @@
+# Module handling symbolic icons for XStitch charts
 from os import linesep
 
 #All symbols are 9x9 pixel elements, since this is a good upscaling size and gives moderate detail levels, while leaving one pixel for edging etc in a 10x10 square

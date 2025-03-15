@@ -1,6 +1,9 @@
+# Module dealing with naming colours
 from math import sqrt, atan2, pi
 
 def nameColour(colourTriplet, mode = 'RGB'):
+  """Attempt to give meaningful name to a given colour triplet
+  NOTE: This works a LOT better in LAB space than RGB """
 
   if mode in ['RGB', 'rgb']:
     return nameColourRGB(colourTriplet)
@@ -10,17 +13,20 @@ def nameColour(colourTriplet, mode = 'RGB'):
     return None
 
 def nameColourLAB(colourTriplet):
+  """ Attempt to name a colour triplet assuming it is in LAB space
+  Combines a measure of the lightness with a position on colour wheel
+  Adds Brown and Pink as well as white-grey-black manually
+  """
 
   l, a, b = colourTriplet
-  # a- red-green. b- blue-yellow 
-  
+  # a- red-green. b- blue-yellow
+
   r = sqrt((a-128)**2 + (b-128)**2)
   theta = atan2((128-b),(a-128)) + pi
-  
+
   #Handle central balanced region specially
   if r < 10:
     # Generally balanced greys
-    
     if l > 220:
       return ["","white"]
     elif l > 180:
@@ -44,7 +50,7 @@ def nameColourLAB(colourTriplet):
     name = ["vd."]
 
   # Work in 8 regions of angle, with tweaks to bounds
-  
+
   #print(a, b, r, theta, pi/8, 3*pi/8)
   if theta > 0 and theta < 3*pi/16:
     name.append("green")
@@ -65,8 +71,8 @@ def nameColourLAB(colourTriplet):
   else:
     name.append("green")
 
-  # Amend a few special names 
-  
+  # Amend a few special names
+
   if name[0] == "d." and (name[1] == "orange" or name[1] == "yellow"):
     name = ["","brown"]
   elif name[0] == "vd." and (name[1] == "orange" or name[1] == "yellow"):
@@ -75,7 +81,7 @@ def nameColourLAB(colourTriplet):
     name = ["","pink"]
   elif name[0] == "vl." and (name[1] == "orange" or name[1] == "red"):
     name = ["l.","pink"]
-    
+
   # Amend brightnesses for those removed
   if "yellow" in name or "orange" in name:
     if name[0] == "":
@@ -88,6 +94,8 @@ def nameColourLAB(colourTriplet):
   return name
 
 def nameColourRGB(colourTriplet):
+  """Attempt to name colours in RGB space. THIS DOES NOT WORK WELL. If possible
+  convert to LAB space and use that """
   # Bad heuristic colour naming. Use LAB if possible!
 
   # Identify dominances
@@ -96,14 +104,13 @@ def nameColourRGB(colourTriplet):
   gb = colourTriplet[1] - colourTriplet[2]
   diffs = (rg, rb, gb)
   bright = sum(colourTriplet)
- 
+
   name = ""
- 
+
   # Balanced channels - divide black/white/grey from brightnesses
   bal = 40
   if abs(rg) < bal and abs(rb) < bal and abs(gb) < bal:
     # Some sort of grey
-    
     if bright > 750:
       return "white"
     elif bright > 500:
@@ -120,7 +127,7 @@ def nameColourRGB(colourTriplet):
     name = "light "
   elif bright < 300:
     name = "dark "
-  
+
   dom = 0.75 * bright
   bal = 40
   # One channel dominance
@@ -136,11 +143,11 @@ def nameColourRGB(colourTriplet):
     # Blue is "most" of brightness
     name += "blue"
     return name
-  
+
   # 2 channel dominance (one channel antidominant)
   antidom = 1.0/4.0 * bright
   bal = bright / 5.0
-  
+
   if colourTriplet[2] < antidom:
     if rg > bal:
       if bright < 300:

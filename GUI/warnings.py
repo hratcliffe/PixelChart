@@ -6,6 +6,9 @@ import re
 
 
 class WarnDialog(QDialog):
+  """Show a simple warning message and allow abort or continue
+  Offers an option to request not to see this warning (caller to preserve if wished)
+  """
   dialog_file = files('GUI').joinpath('WarningDialog.ui')
 
   def __init__(self):
@@ -31,6 +34,9 @@ def _subs(text, sub):
 
 
 class PresaveDialog(QDialog):
+  """Show settings and warnings before saving/outputting a file
+  Offers cancel or continue options
+  """
   dialog_file = files('GUI').joinpath('PresaveDialog.ui')
 
   def __init__(self):
@@ -38,7 +44,7 @@ class PresaveDialog(QDialog):
     loadUi(self.dialog_file, self)
 
   def fill_warnings(self, warnings_list):
-
+    """Add each string in given list to Warnings section"""
     self.warn_layout = QVBoxLayout()
     self.warningsGroup.setLayout(self.warn_layout)
 
@@ -47,6 +53,7 @@ class PresaveDialog(QDialog):
       self.warn_layout.addWidget(txt)
 
   def fill_settings(self, settings_list):
+    """Add each string in given list to Settings section"""
 
     self.set_layout = QVBoxLayout()
     self.settingsGroup.setLayout(self.set_layout)

@@ -1,7 +1,6 @@
 import csv
-import numpy as np
-from math import sqrt
-from scipy.spatial import KDTree
+
+from General.searcher import *
 
 def listBrands():
 
@@ -14,7 +13,9 @@ def listBrands():
   return(lines)
 
 class colourChart:
-
+  """Create a colour chart for a specific brand of thread
+  Known brands are in brands.csv, data for them are in <name>_Data.csv
+  """
   def __init__(self, brand = "DMC"):
   
     from importlib_resources import files
@@ -31,6 +32,7 @@ class colourChart:
           gotBrand = True
           self.brandCode = line[1]
 
+    # TODO This should raise error?
     if not gotBrand:
       print("Error - no colour data for {}".format(brand))
       return
@@ -42,6 +44,8 @@ class colourChart:
     self.brand = brand  # Brand can also be special value "Custom" which implies a mixture - each colour can differ - otherwise each colour can either be as parent, or be Brand None
     self.srcfile = filename
 
+    # Create the chart from file. Chart items are a colourChartItem
+    # Note brand is per-item as custom charts may mix them
     self.chart = []
     with open(coloursFile, 'r') as infile:
       rdr = csv.reader(infile, delimiter=',')
@@ -51,48 +55,18 @@ class colourChart:
       else:
         for line in rdr:
           self.chart.append(colourChartItem(name=line[1], num=(line[0]), r=int(line[2]), g=int(line[3]), b=int(line[4]), brand=brand))
-        
-    self.searcher = buildTree(self.chart, data='rgb') 
+
+    # Make search tree TODO replace with better searcher object?    
+    self.searcher = buildTreeProperty(self.chart, data='rgb') 
 
   def matchColour(self, colour, numOptions=1):
     #Return closest item to given one
     # Default is to return single closest, numOptions is the number of matches, best to worst, to return
     return self.searcher.find(colour, numOptions)
 
-    
-def buildTree(lst, data):
-  # Build search tree for rapid searches over `list`. data is the property name to use as the distance. Data should be a triplet
-
-  dat_arr = np.zeros((len(lst), 3))
-  for cnt, item in enumerate(lst):
-    dat_arr[cnt] = getattr(item, data)
-
-  sTree = KDTree(dat_arr)
-  return searcher(sTree, lst, data)
-  
-class searcher:
-
-  def __init__(self, tree, items, dataProp):
-    self.tree = tree
-    self.items = items
-    self.dataProp = dataProp
-    
-  def find(self, item, numOptions):
-    #Return closest item to given one
-    # Default is to return single closest, numOptions is the number of matches, best to worst, to return
-
-    dist,points = self.tree.query(getattr(item, self.dataProp), numOptions)
-
-    if numOptions > 1:
-      fnd_items = []
-      for pt in points:
-        fnd_items.append(self.items[pt])
-      return fnd_items
-    else:
-      return self.items[points]
-
 class colourChartItem:
-
+  """ Entry in a colour chart. Specifies a Name, num, r, g, b code and a Brand
+  """
   def __init__(self, name='Name', num=0, r=0, g=0, b=0, brand=None):
   
     self.name = name
@@ -101,6 +75,7 @@ class colourChartItem:
     self.rgb = (r, g, b)
     
   def __str__(self):
+    """Stringify"""
     return "{}, {}, ({})".format(self.num, self.name, self.rgb)
 
 class colourItem:
