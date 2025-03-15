@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow
-from PyQt5.uic import loadUi
+from PyQt6.QtWidgets import QApplication, QMainWindow
+from PyQt6.uic import loadUi
 
 from importlib_resources import files
 from .file_handling import FileDetailsHandler, FileLoader

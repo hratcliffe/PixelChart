@@ -1,5 +1,5 @@
-from PyQt5.uic import loadUi
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel
+from PyQt6.uic import loadUi
+from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel
 from importlib_resources import files
 
 import re

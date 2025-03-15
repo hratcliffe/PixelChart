@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QRadioButton
-from PyQt5.uic import loadUi
-from PyQt5.QtGui import QKeySequence, QPixmap, QColor
+from PyQt6.QtWidgets import QWidget, QLabel, QRadioButton
+from PyQt6.uic import loadUi
+from PyQt6.QtGui import QKeySequence, QPixmap, QColor
 
 from XStitchHeuristics.colours import colourChart, colourItem
 

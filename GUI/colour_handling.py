@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot
 
 from .types import ImageStatePayload, ImageChangePayload, ImageCombinePayload, ImageEnhancePayload
 from XStitchHeuristics.colours import listBrands
@@ -110,7 +110,7 @@ class ColourOptionsHandler(QObject):
 
     #Temporary - just start colour picker
     advDialog = CombinerDialog(self.window.imageH.get_image(), self.combine_triggered)
-    advDialog.exec_()
+    advDialog.exec()
 
   # Apply any GUI updates needed when image state changes
   @pyqtSlot(ImageStatePayload)

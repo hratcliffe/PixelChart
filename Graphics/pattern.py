@@ -1,8 +1,8 @@
-from PyQt5.QtGui import QPixmap, QImage, QPainter, QFont, QIcon
-from PyQt5.QtWidgets import QGraphicsView, QGridLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView, QProgressDialog
-from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
-import PyQt5.QtCore as qtc
-from PyQt5.QtCore import QSize, QRect
+from PyQt6.QtGui import QPixmap, QImage, QPainter, QFont, QIcon
+from PyQt6.QtWidgets import QGraphicsView, QGridLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView, QProgressDialog
+from PyQt6.QtPrintSupport import QPrintDialog, QPrinter
+import PyQt6.QtCore as qtc
+from PyQt6.QtCore import QSize, QRect
 
 from PIL import ImageQt
 
@@ -64,10 +64,10 @@ class PatternGenerator:
   def rescale_to_page(self, pixmap, o_sz):
     """Rescale image ensuring pixelation retained"""
     sz = pixmap.size()
-    sz.scale(o_sz, qtc.Qt.KeepAspectRatio)
+    sz.scale(o_sz, qtc.Qt.AspectRatioMode.KeepAspectRatio)
     sz = sz*self.o_scl
     # Must scale pixmap manually to ensure transform is fast style, to retain pixelation
-    return pixmap.scaled(int(sz.width()*self.o_scl), int(sz.height()*self.o_scl), qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+    return pixmap.scaled(int(sz.width()*self.o_scl), int(sz.height()*self.o_scl), qtc.Qt.AspectRatioMode.KeepAspectRatio, qtc.Qt.TransformationMode.FastTransformation)
 
 
   def get_size_text(self, im_sz, gg):
@@ -92,7 +92,7 @@ class PatternGenerator:
     row = 0
     col = 0
     tbl.setColumnCount(col_cnt)
-    tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+    tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
 
     tbl.horizontalHeader().hide()
     tbl.verticalHeader().hide()
@@ -103,13 +103,13 @@ class PatternGenerator:
       tbl.setItem(row, col, QTableWidgetItem(" ".join(item[4])))
       col = col + 1
 
-      badgeMap = item[2].toqpixmap().scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+      badgeMap = item[2].toqpixmap().scaled(50, 50, qtc.Qt.AspectRatioMode.KeepAspectRatio, qtc.Qt.TransformationMode.FastTransformation)
       tbl.setItem(row, col, QTableWidgetItem())
       tbl.item(row, col).setIcon(QIcon(badgeMap))
 
       col = col + 1
 
-      symMap = item[3].toqpixmap().scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+      symMap = item[3].toqpixmap().scaled(50, 50, qtc.Qt.AspectRatioMode.KeepAspectRatio, qtc.Qt.TransformationMode.FastTransformation)
       tbl.setItem(row, col, QTableWidgetItem())
       tbl.item(row, col).setIcon(QIcon(symMap))
       col = col + 1
@@ -149,7 +149,7 @@ class PatternGenerator:
     row = 0
     col = 0
     tbl.setColumnCount(col_cnt)
-    tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+    tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
     tbl.horizontalHeader().setStretchLastSection(True)
 
     tbl.horizontalHeader().hide()
@@ -158,7 +158,8 @@ class PatternGenerator:
     for item in key:
       tbl.setRowCount(row+1)
 
-      symMap = item[3].toqpixmap().scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+      symMap = item[3].toqpixmap().scaled(50, 50, qtc.Qt.AspectRatioMode.KeepAspectRatio, qtc.Qt.TransformationMode.FastTransformation)
+
       tbl.setItem(row, col, QTableWidgetItem())
       tbl.item(row, col).setIcon(QIcon(symMap))
       col = col + 1
@@ -172,7 +173,7 @@ class PatternGenerator:
         col = col + 1
 
         symMap = makeSwatch(colour.rgb).toqpixmap()
-        symMap = symMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+        symMap = symMap.scaled(50, 50, qtc.Qt.AspectRatioMode.KeepAspectRatio, qtc.Qt.TransformationMode.FastTransformation)
         tbl.setItem(row, col, QTableWidgetItem())
         tbl.item(row, col).setIcon(QIcon(symMap))
         col = col + 1
@@ -199,11 +200,11 @@ class PatternGenerator:
     """Save a pattern file as PDF, with options as given in details dict"""
 
     progress = QProgressDialog("Saving Pattern", "Abort", 0, 4)
-    progress.setWindowModality(qtc.Qt.WindowModal)
+    progress.setWindowModality(qtc.Qt.WindowModality.WindowModal)
     progress.forceShow()
 
-    printer = QPrinter(QPrinter.HighResolution)
-    printer.setOutputFormat(QPrinter.PdfFormat)
+    printer = QPrinter(QPrinter.PrinterMode.HighResolution)
+    printer.setOutputFormat(QPrinter.OutputFormat.PdfFormat)
     printer.setOutputFileName(filename)
 
     painter = QPainter()
@@ -214,12 +215,12 @@ class PatternGenerator:
     o_sz = rect.size()
 
     # Draw title and header text
-    painter.drawText(QRect(0, 0, o_sz.width(), int(o_sz.height()/40)), qtc.Qt.AlignCenter, details["PTitle"])
-    painter.drawText(QRect(0, int(o_sz.height()/40), o_sz.width(), int(o_sz.height()/20)), qtc.Qt.AlignCenter, details["PText"])
+    painter.drawText(QRect(0, 0, o_sz.width(), int(o_sz.height()/40)), qtc.Qt.AlignmentFlag.AlignCenter, details["PTitle"])
+    painter.drawText(QRect(0, int(o_sz.height()/40), o_sz.width(), int(o_sz.height()/20)), qtc.Qt.AlignmentFlag.AlignCenter, details["PText"])
 
     if details["FinalSize"]:
       mess = self.get_size_text(image.getImage(opt=False).size, details["Gauge"])
-      painter.drawText(QRect(0, int(o_sz.height()/20), o_sz.width(), int(3*o_sz.height()/40)), qtc.Qt.AlignCenter, mess)
+      painter.drawText(QRect(0, int(o_sz.height()/20), o_sz.width(), int(3*o_sz.height()/40)), qtc.Qt.AlignmentFlag.AlignCenter, mess)
 
     # Colour image
     pixmap = self.rescale_to_page(image.getImage(opt=False).toqpixmap(), o_sz)

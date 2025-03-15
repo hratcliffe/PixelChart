@@ -1,6 +1,6 @@
-from PyQt5.QtGui import QFont
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtWidgets import QGridLayout, QLabel
+from PyQt6.QtGui import QFont
+from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
+from PyQt6.QtWidgets import QGridLayout, QLabel
 from PIL import ImageQt
 
 from ColourHandling import imageExt
@@ -52,9 +52,9 @@ class ImageHandler(QObject):
     sz = pixmap.size()
     sz_b = pixmap.size()
     port_sz = self.pane.viewport().size()
-    sz.scale(port_sz, Qt.KeepAspectRatio)
+    sz.scale(port_sz, Qt.AspectRatioMode.KeepAspectRatio)
     scl = 0.95  #Scale down slightly to accomodate borders and things
-    pixmap = pixmap.scaled(int(sz.width()*scl), int(sz.height()*scl), Qt.KeepAspectRatio, Qt.FastTransformation)
+    pixmap = pixmap.scaled(int(sz.width()*scl), int(sz.height()*scl), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.FastTransformation)
 
     self.image_hook.setPixmap(pixmap)
     self.image_hook.adjustSize()
@@ -87,7 +87,7 @@ class ImageHandler(QObject):
       keyItem.setFont(QFont("Arial", 10))
       
       badgeMap = item[2].toqpixmap()
-      badgeMap = badgeMap.scaled(50, 50, Qt.KeepAspectRatio, Qt.FastTransformation)
+      badgeMap = badgeMap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.FastTransformation)
       keyBadge = QLabel()
       keyBadge.setPixmap(badgeMap)
       keyBadge.adjustSize()
@@ -154,7 +154,7 @@ class ImageHandler(QObject):
     checkDialog.fill_settings(checks["settings"])
     checkDialog.show()
 
-    return checkDialog.exec_() 
+    return checkDialog.exec() 
     
   @pyqtSlot(ImageChangePayload)
   def on_image_change_request(self, value):

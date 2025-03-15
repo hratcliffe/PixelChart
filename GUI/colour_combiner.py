@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import QDialog, QWidget, QLabel, QPushButton, QGridLayout, QCheckBox
-from PyQt5.uic import loadUi
-from PyQt5.QtGui import QPixmap, QColor
-from PyQt5.QtCore import QVariant
+from PyQt6.QtWidgets import QDialog, QWidget, QLabel, QPushButton, QGridLayout, QCheckBox
+from PyQt6.uic import loadUi
+from PyQt6.QtGui import QPixmap, QColor
+from PyQt6.QtCore import QVariant
 
 from ColourHandling.interfaceRoutines import makeSwatch
 from General.searcher import *
@@ -78,7 +78,11 @@ class ColourPicker(QWidget):
     shortList = self.searcher.find(item, self.default_n_picks+1)
     # Invoke Picker dialog
     picker = ComboPicker(item, shortList[1:], self._callback)
+<<<<<<< HEAD
+    picker.exec()
+=======
     picker.exec_()
+>>>>>>> master
 
 
 class ComboPicker(QDialog):

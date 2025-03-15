@@ -1,6 +1,6 @@
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
-from PyQt5.uic import loadUi
-from PyQt5.QtWidgets import QDialog, QFileDialog
+from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot
+from PyQt6.uic import loadUi
+from PyQt6.QtWidgets import QDialog, QFileDialog
 
 from importlib_resources import files
 from copy import deepcopy
@@ -31,8 +31,8 @@ class FileLoader(QObject):
   def load_file(self):
   
     loader = QFileDialog()
-    loader.setFileMode(QFileDialog.ExistingFile)    
-    if(loader.exec_()):
+    loader.setFileMode(QFileDialog.FileMode.ExistingFile)    
+    if(loader.exec()):
       filename = loader.selectedFiles()[0]
       self.details.fill_filename(filename)
       self.window.load_triggered(filename)
@@ -44,10 +44,9 @@ class FileLoader(QObject):
     """
 
     loader = QFileDialog()
-    loader.setAcceptMode(QFileDialog.AcceptSave)
-    loader.setFileMode(QFileDialog.AnyFile)    
-    loader.show()
-    if(loader.exec_()):
+    loader.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+    loader.setFileMode(QFileDialog.FileMode.AnyFile)    
+    if loader.exec():
       filename = loader.selectedFiles()[0]
       root, ext = path.splitext(filename)
       new_ext = '.png'
@@ -55,8 +54,7 @@ class FileLoader(QObject):
         dialog = WarnDialog()
         dialog.set_message("Warning: jpg format may introduce new colours. Recommend saving as png instead")  
         dialog.set_options(new_ext, ".jpg")
-        dialog.show()
-        if dialog.exec_():
+        if dialog.exec():
           filename = root + new_ext
       
         self.jpg_warning_dismissed = dialog.check_dontAskState()
@@ -69,10 +67,9 @@ class FileLoader(QObject):
     """
   
     loader = QFileDialog()
-    loader.setAcceptMode(QFileDialog.AcceptSave)
-    loader.setFileMode(QFileDialog.AnyFile)    
-    loader.show()
-    if(loader.exec_()):
+    loader.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+    loader.setFileMode(QFileDialog.FileMode.AnyFile)    
+    if loader.exec():
       filename = loader.selectedFiles()[0]
       stuff = self.details.get_details()
       self.pattern_save_triggered.emit(PatternPayload(filename, stuff))
@@ -115,7 +112,7 @@ class FileDetailsHandler(QObject):
     extrasDialog = FileExtras(self.extras_dict)
     # Force key to be output if certain extras are selected
     extrasDialog.connect_checks(self.needs_key)
-    extrasDialog.exec_()
+    extrasDialog.exec()
     self.extras_dict = extrasDialog.get_selections()
 
   def resize_button_clicked(self):
