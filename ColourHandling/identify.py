@@ -67,7 +67,7 @@ def nameColourLAB(colourTriplet):
   elif theta < 27*pi/16:
     name.append("blue")
   elif theta < 29*pi/8:
-    name.append("cyan")
+    name.append("cyan")  #TODO is '8' a typo?
   else:
     name.append("green")
 
@@ -92,6 +92,32 @@ def nameColourLAB(colourTriplet):
       name[0] = "l."
 
   return name
+
+def isPrimaryLAB(colourTriplet, pick):
+  """ Return true or false for whether the given triplet 'is' the given primary colour"""
+  if pick not in ['r', 'g', 'b']: return False
+
+  l, a, b = colourTriplet
+  # a- red-green. b- blue-yellow
+
+  #Very dark or very light are NO colour
+  if l < 80 or l > 200: return False
+
+  r = sqrt((a-128)**2 + (b-128)**2)
+  theta = atan2((128-b),(a-128)) + pi
+
+  if theta > 0 and theta < 7*pi/16:
+    # Green-ish
+    if pick == 'g': return True
+  elif theta > 10*pi/16 and theta < 17*pi/16:
+    # Red-ish
+    if pick == 'r': return True
+  elif theta > 25*pi/16 and theta < 29*pi/16:
+    # Blue-ish
+    if pick == 'b': return True
+
+  return False
+
 
 def nameColourRGB(colourTriplet):
   """Attempt to name colours in RGB space. THIS DOES NOT WORK WELL. If possible

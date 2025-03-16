@@ -54,6 +54,12 @@ class imageExt:
     
     return self
   
+  def getColourSpace(self):
+    """Get colourSpace: either RGB or LAB valid"""
+
+    if self.optImageInUse: return 'LAB'
+    return 'RGB'
+
   def getImage(self, opt= None):
 
     if opt is not None and opt is False:

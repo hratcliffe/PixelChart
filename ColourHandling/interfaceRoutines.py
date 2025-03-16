@@ -10,7 +10,7 @@ from .reduceColours import combineColours, getSimilarColours, mergeColours
 
 def reduceColours(image, n_cols, emph=None, opt=False):
   """Modify given image to have exactly n_cols distinct colours"""
-  new_image = mergeColours(image.getImage(opt), n_cols=n_cols, emph=emph)
+  new_image = mergeColours(image.getImage(opt), n_cols=n_cols, emph=emph, mode=image.getColourSpace())
   image.setImage(new_image)
 
 def recolour(image, map):

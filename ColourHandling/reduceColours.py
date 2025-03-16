@@ -2,6 +2,7 @@
 from .replace import *
 
 from .colourDistances import calculateDistance
+from .identify import isPrimaryLAB
 
 from sklearn.cluster import KMeans
 from PIL import Image
@@ -9,7 +10,7 @@ from math import floor, sqrt
 
 from numpy import ones
 
-def mergeColours(imageIn, n_cols=20, emph=None):
+def mergeColours(imageIn, n_cols=20, emph=None, mode='RGB'):
   """Reduce number of colours by clustering. The result will contain exactly n_cols colours. Running this with a large number of end colours is a good first pass at converting a picture into a chart, prior to detailled colour replacements"""
 
   #If emph is given, upweights the given choice. HOWEVER this does not really change the number of clusters
@@ -20,7 +21,8 @@ def mergeColours(imageIn, n_cols=20, emph=None):
 
   if emph:
     if emph in ['r', 'g', 'b']:
-      weights = calculateWeightsForColour(data, sz, emph)
+      print("emphsizing in {}".format(mode))
+      weights = calculateWeightsForColour(data, sz, emph, mode=mode)
     elif emph in ['s', 'i']:
       weights = calculateWeightsForChannel(data, sz, emph)
     else:
@@ -78,25 +80,30 @@ def getSimilarColours(colour, allColours, n_cols=10):
 
     return [item[1] for item in dists]
 
-def calculateWeightsForColour(pixels, sz, channel):
+def calculateWeightsForColour(pixels, sz, channel, mode='LAB'):
   """Calculate weighting for how strong each pixel is in given colour channel (r, g, b)
   This can be supplied to use weighted KMeans clustering which will EMPHASIZE the given channel.
   Takes a 1-D pixel array, returns 1-D array of weights 1 to 10
   """
 
-  #To start, check whether chosen channel represents more than some frac of total brightness, then assign weight of 2
-
   weights = ones(sz[0]*sz[1]-1)
   channels = ['r', 'g', 'b']
   if(channel not in channels): return weights
 
-  channel_num = channels.index(channel)
-
-  for n in range(0, sz[0]*sz[1]-1):
-    val = pixels[n][channel_num]
-    bright = 1 + pixels[n][0] + pixels[n][1] + pixels[n][2]
-    if(val/bright > 0.5): weights[n] = 10
-    #print(weights[n])
+  if mode == 'LAB':
+    #Triplet is in LAB space. Do r-theta id
+    for n in range(0, sz[0]*sz[1]-1):
+      val = pixels[n]
+      if isPrimaryLAB(val, channel):
+        weights[n] = 10
+    print(weights)
+  else:
+    channel_num = channels.index(channel)
+    for n in range(0, sz[0]*sz[1]-1):
+      val = pixels[n][channel_num]
+      bright = 1 + pixels[n][0] + pixels[n][1] + pixels[n][2]
+      if(val/bright > 0.5): weights[n] = 10
+      #print(weights[n])
 
   return weights
 
