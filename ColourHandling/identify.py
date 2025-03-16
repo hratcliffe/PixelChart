@@ -198,4 +198,63 @@ def nameColourRGB(colourTriplet):
 
   return None
 
+def RGB2LAB(colourTriplet):
+  # Formulae from https://www.easyrgb.com/en/math.php
+  # Using Daylight illumination
 
+  r, g, b = colourTriplet
+  r /= 255
+  g /= 255
+  b /= 255
+
+  # To intermediate
+
+  if r > 0.04045:
+    s = ((r + 0.055)/1.055)**2.4
+  else:
+    s = r/12.92
+  if g > 0.04045:
+    t = ((g + 0.055)/1.055)**2.4
+  else:
+    t = g/12.92
+  if b > 0.04045:
+    u = ((b + 0.055)/1.055)**2.4
+  else:
+    u = b/12.92
+
+  s *= 100
+  t *= 100
+  u *= 100
+
+  x = s * 0.4124 + t * 0.3576 + u * 0.1805
+  y = s * 0.2126 + t * 0.7152 + u * 0.0722
+  z = s * 0.0193 + t * 0.1192 + u * 0.9505
+
+  D = [95.047, 100.0, 108.883]
+  x /= D[0]
+  y /= D[1]
+  z /= D[2]
+
+  if x > 0.008856:
+    x = x**0.333
+  else:
+    x = (7.787 * x ) + 16/116
+  if y > 0.008856:
+    y = y**0.333
+  else:
+    y = (7.787 * x ) + 16/116
+  if z > 0.008856:
+    z = z**0.333
+  else:
+    z = (7.787 * z ) + 16/116
+
+  l = (116 * y) - 16
+  a = 500 * (x - y)
+  b = 200 * (y - z)
+
+  #Using Pillow where all run 0 to 255
+  l *= 255/100
+  a += 128
+  b += 128
+
+  return (l, a, b)
