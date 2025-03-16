@@ -78,11 +78,7 @@ class ColourPicker(QWidget):
     shortList = self.searcher.find(item, self.default_n_picks+1)
     # Invoke Picker dialog
     picker = ComboPicker(item, shortList[1:], self._callback)
-<<<<<<< HEAD
     picker.exec()
-=======
-    picker.exec_()
->>>>>>> master
 
 
 class ComboPicker(QDialog):
