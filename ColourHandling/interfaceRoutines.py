@@ -8,11 +8,10 @@ from .transform import *
 from .reduceColours import combineColours, getSimilarColours, mergeColours
 
 
-def reduceColours(image, n_cols, opt=False):
+def reduceColours(image, n_cols, emph=None, opt=False):
   """Modify given image to have exactly n_cols distinct colours"""
-  new_image = mergeColours(image.getImage(opt), n_cols)
+  new_image = mergeColours(image.getImage(opt), n_cols=n_cols, emph=emph)
   image.setImage(new_image)
-
 
 def recolour(image, map):
   """Modify given image by changing colours according to the given map"""
