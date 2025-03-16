@@ -62,7 +62,7 @@ class ColourOptionsHandler(QObject):
     # Extract colour options
     num = self.window.colour_num_select.value()
 
-    vals = {"Emphasize": self.window.emphasize_select.currentData(), "Optimize": self.window.optimize_select.currentData(), "Palette":self.window.palette_select.currentData()}
+    vals = {"Emphasize": self.window.emphasize_select.currentData(), "Palette":self.window.palette_select.currentData()}
 
     self.image_change_request.emit(ImageChangePayload(num, opts=vals))
 
@@ -126,14 +126,8 @@ def fill_colour_combos(window):
   window.emphasize_select.addItem("Red", 'r')
   window.emphasize_select.addItem("Blue", 'b')
   window.emphasize_select.addItem("Green", 'g')
-  window.emphasize_select.addItem("Lines", 'l')
   window.emphasize_select.addItem("Brights", 'h')
   window.emphasize_select.addItem("Shade", 's')
-
-  window.optimize_select.addItem("None", '0')
-  window.optimize_select.addItem("Landscape", 'l')
-  window.optimize_select.addItem("Portrait", 'p')
-  window.optimize_select.addItem("Object", 'o')
 
   brands = listBrands()
   window.palette_select.addItem("None", None)
