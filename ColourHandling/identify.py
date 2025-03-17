@@ -101,22 +101,34 @@ def isPrimaryLAB(colourTriplet, pick):
   # a- red-green. b- blue-yellow
 
   #Very dark or very light are NO colour
-  if l < 80 or l > 200: return False
+  if l < 40 or l > 230: return False
 
   r = sqrt((a-128)**2 + (b-128)**2)
   theta = atan2((128-b),(a-128)) + pi
 
-  if theta > 0 and theta < 7*pi/16:
+
+  #Central a-b region is not coloured
+  if r < 20: return False
+
+  #TODO refine the boundaries
+
+  if theta > 0 and theta < 9*pi/16:
     # Green-ish
     if pick == 'g': return True
-  elif theta > 10*pi/16 and theta < 17*pi/16:
+  elif theta > 10*pi/16 and theta < 18*pi/16:
     # Red-ish
     if pick == 'r': return True
-  elif theta > 25*pi/16 and theta < 29*pi/16:
+  elif theta > 19*pi/16 and theta < 29*pi/16:
     # Blue-ish
     if pick == 'b': return True
 
   return False
+
+def isPrimaryRGB(colourTriplet, pick):
+  """ Return true or false for whether the given triplet 'is' the given primary colour"""
+  if pick not in ['r', 'g', 'b']: return False
+
+  return isPrimaryLAB(RGB2LAB(colourTriplet), pick)
 
 
 def nameColourRGB(colourTriplet):
