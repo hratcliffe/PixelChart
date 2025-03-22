@@ -1,5 +1,5 @@
-from PyQt6.QtGui import QFont
-from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
+from PyQt6.QtGui import QFont, QPixmap, QColor
+from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot, Qt, QEvent, QPointF
 from PyQt6.QtWidgets import QGridLayout, QLabel
 from PIL import ImageQt
 
@@ -11,6 +11,8 @@ from Graphics.pattern import PatternGenerator
 from .types import ImageStatePayload, ImageChangePayload, ImageSizePayload, PatternPayload, ImageCombinePayload, ImageEnhancePayload
 from .warnings import PresaveDialog
 from .recolour import RecolourDialog
+
+from math import floor
 
 # TODO This is a bit of a God object. Should some functions be delegated to something else?
 
@@ -27,8 +29,14 @@ class ImageHandler(QObject):
     self.key_layout = None
     self.key = None
     self.pGen = PatternGenerator()
-    
+
     self.cChart = colourChart()
+
+    #Mouse tracking over image
+    self.image_hook.setMouseTracking(True)
+    self.image_hook.installEventFilter(self)
+
+    self.colourPatch = window.swatch
 
   def check_for_image(self):
     return self.full_image is not None
@@ -59,6 +67,9 @@ class ImageHandler(QObject):
     self.image_hook.setPixmap(pixmap)
     self.image_hook.adjustSize()
     self.image_hook.show()
+
+    #Store relative scale between image and pixmap
+    self.pixmap_scl = new_image.size()[0]/pixmap.size().width()
 
     im_cols = len(self.full_image.colourCounts)
     self.show_key(True)
@@ -193,7 +204,26 @@ class ImageHandler(QObject):
 
     # self.key was filled last time image was changed
     self.pGen.save(value.filename, value.details, self.full_image, self.key, self.cChart)
-    
+
+  def eventFilter(self, widget, event):
+    if event.type() == QEvent.Type.MouseButtonPress:
+      pos = event.position()
+      self.showColourAtPosition(pos)
+
+    return super().eventFilter(widget, event)
+
+  def showColourAtPosition(self, position):
+    #Position relative to image_hook, figures out the scaling and looks up in the ORIGINAL image
+    s_pos = position * self.pixmap_scl
+    # Floor - select the pixel we're within
+    n_pos = QPointF(floor(s_pos.x()), floor(s_pos.y()))
+
+    colour = self.full_image.getColourAt(n_pos)
+    if colour:
+      swatch = QPixmap(100, 20)
+      swatch.fill(QColor(colour[0], colour[1], colour[2]))
+      self.colourPatch.setPixmap(swatch)
+
 def clearLayout(layout):
   # From https://stackoverflow.com/questions/4528347/clear-all-widgets-in-a-layout-in-pyqt  or https://stackoverflow.com/a/10067548
   while layout.count():

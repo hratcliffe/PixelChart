@@ -28,12 +28,20 @@ class imageExt:
     self.imageHelper = imageModeHelper()
 
   def resize(self, width, height):
-  
-    
+
     new_image = self.coreImage.resize((width, height), Image.Resampling.LANCZOS)
     self.setImage(new_image)
 
-    
+  def size(self):
+    return self.coreImage.size
+
+  def getColourAt(self, pos):
+    """Get the colour at the given pos object with x and y"""
+    try:
+      return self.coreImagePixels[pos.x(), pos.y()]
+    except:
+      return None
+
   def getColourWithMode(self, colourTriplet):
     """Change from given colour into correct form for mode of this image"""
     
