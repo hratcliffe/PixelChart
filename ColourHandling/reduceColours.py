@@ -91,6 +91,8 @@ def mergeColoursEmphasized(imageIn, n_cols=20, emph=None, mode='RGB'):
         isIn = isPrimaryRGB(item, emph)
       elif mode == 'LAB':
         isIn = isPrimaryLAB(item, emph)
+    elif emph in ['s', 'i']:
+      isIn = isCharacter(item, emph, mode)
     else:
       isIn = False # TODO fix this
     if isIn:

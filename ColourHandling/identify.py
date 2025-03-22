@@ -130,6 +130,43 @@ def isPrimaryRGB(colourTriplet, pick):
 
   return isPrimaryLAB(RGB2LAB(colourTriplet), pick)
 
+def isPrimary(colourTriplet, pick, mode):
+  """ Return true or false for whether the given triplet 'is' the given primary colour"""
+
+  if mode == 'RGB':
+    return isPrimaryRGB(colourTriplet, pick)
+  elif mode == 'LAB':
+    return isPrimaryLAB(colourTriplet, pick)
+  else:
+    raise ValueError("Unknown colour mode in identify")
+
+
+def isCharacter(colourTriplet, pick, mode):
+  """ Return true or false for whether the given triplet is the following:
+      pick == 'i' : lIght. I.e. high lightness
+      pick == 's' : shade. I.e. dark
+      pick == 't' : sTrong. I.e. strongly coloured
+  """
+
+  if mode == 'RGB':
+    cTrip = RGB2LAB(colourTriplet)
+  elif mode == 'LAB':
+    cTrip = colourTriplet
+  else:
+    raise ValueError("Unknown colour mode in identify")
+
+  if pick == 'i':
+    # Look at overall lightness
+    if cTrip[0] > 200: return True
+  elif pick == 's':
+    #Ditto, but dark
+    if cTrip[0] < 60: return True
+  elif pick == 't':
+    # Mid range lightness, colour not too central (balanced)
+    l, a, b = colourTriplet
+    r = sqrt((a-128)**2 + (b-128)**2)
+    if l > 60 and l < 200 and r > 40: return True
+
 
 def nameColourRGB(colourTriplet):
   """Attempt to name colours in RGB space. THIS DOES NOT WORK WELL. If possible
