@@ -66,8 +66,10 @@ def mergeColoursEmphasized(imageIn, n_cols=20, emph=None, mode='RGB'):
   # NOTE: this does run clustering 3 times as opposed to 1
 
   #Emph not present or not known
-  if not emph or (emph not in ['r', 'g', 'b', 's', 'i', 't']):
+  if not emph:
     return mergeColours(imageIn, n_cols)
+  elif emph not in ['r', 'g', 'b', 's', 'i', 't']:
+    raise ValueError("Bad Emphasis Value {}".format(emph))
 
   # Temporary image as 1-d array of colours
   data = imageIn.getdata()
@@ -87,14 +89,11 @@ def mergeColoursEmphasized(imageIn, n_cols=20, emph=None, mode='RGB'):
   #for item in kmeans.cluster_centers_ :
     item = kmeans.cluster_centers_[i]
     if emph in ['r', 'g', 'b']:
-      if mode == 'RGB':
-        isIn = isPrimaryRGB(item, emph)
-      elif mode == 'LAB':
-        isIn = isPrimaryLAB(item, emph)
+      isIn = isPrimary(item, emph, mode)
     elif emph in ['s', 'i', 't']:
       isIn = isCharacter(item, emph, mode)
     else:
-      isIn = False # TODO fix this
+      isIn = False #Should never get here
     if isIn:
       n_in += 1
       inClustersInd.append(i)
