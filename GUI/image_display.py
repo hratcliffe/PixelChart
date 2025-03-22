@@ -87,7 +87,7 @@ class ImageHandler(QObject):
       keyItem.setFont(QFont("Arial", 10))
       
       badgeMap = item[2].toqpixmap()
-      badgeMap = badgeMap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.FastTransformation)
+      badgeMap = badgeMap.scaled(50, 20, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.FastTransformation)
       keyBadge = QLabel()
       keyBadge.setPixmap(badgeMap)
       keyBadge.adjustSize()
@@ -103,8 +103,11 @@ class ImageHandler(QObject):
 
   def modify_image(self, image, change_payload):
     """Modify the given image according to the given ImageChangePayload"""
-  
-    reduceColours(image, change_payload.n_cols)
+
+    if(change_payload.opts["Emphasize"] != '0'):
+      reduceColours(image, n_cols=change_payload.n_cols, emph=change_payload.opts["Emphasize"])
+    else:
+      reduceColours(image, n_cols=change_payload.n_cols)
 
     recolourD = RecolourDialog(change_payload.opts["Palette"])
     recolourD.do_recolour(image)

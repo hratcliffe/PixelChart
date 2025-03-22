@@ -7,10 +7,10 @@ from ColourHandling.interfaceRoutines import makeSwatch
 from General.searcher import *
 from .types import ImageCombinePayload
 
-
 from importlib_resources import files
 from PIL.ImageQt import toqpixmap
 from re import match as re_match
+from copy import deepcopy
 
 class ColourPicker(QWidget):
   """ Widget to show a list of colour swatches and push buttons to pick a colour
@@ -29,8 +29,42 @@ class ColourPicker(QWidget):
     # Setup dialog box
     self.setup_layout(colourList)
     # Store inputs for later
+    # Current selectable colour list
     self._colourList = colourList
+    # Original colour list
+    self._originalMap = deepcopy(colourList)
     self._callback = callback
+
+  def remove_selections(self, rmList):
+    """Remove the specified colours from the picker and options"""
+
+    newList = self._colourList
+    for item in rmList:
+      if item in newList:
+        newList.remove(item)
+
+    self._colourList = newList
+    self.setup_colour_chart(newList)
+
+    self.remove_from_layout(rmList)
+
+  def remove_from_layout(self, rmList):
+    """Remove the indicated widgets from the layout"""
+
+    #NOTE: the grid does not change; these locations just end up empty and
+    # Thus zero size
+    for item in rmList:
+      try:
+        ii = self._originalMap.index(item)
+        sw = self.gridLayout.itemAtPosition(ii+1, 1)
+        bt = self.gridLayout.itemAtPosition(ii+1, 2)
+        sw2 = self.gridLayout.removeWidget(sw.widget())
+        bt2 = self.gridLayout.removeWidget(bt.widget())
+        del sw2
+        del bt2
+      except Exception as e:
+        #Shouldn't happen
+        print(e)
 
   def setup_layout(self, colourList):
     """Set up widget layout - a list of coloured swatches and a push button
@@ -71,7 +105,7 @@ class ColourPicker(QWidget):
     """Invoke ComboPicker dialog with selected item"""
     # Get sender's colour from list
     num = int(self.sender().property("colourNum"))
-    item = self._colourList[num]
+    item = self._originalMap[num]
 
     # Get shortlist of closest matches for selection
     # +1 to include item itself and n_picks closest others
@@ -79,6 +113,8 @@ class ColourPicker(QWidget):
     # Invoke Picker dialog
     picker = ComboPicker(item, shortList[1:], self._callback)
     picker.exec()
+
+    self.remove_selections(picker.get_picks())
 
 
 class ComboPicker(QDialog):
@@ -118,7 +154,9 @@ class ComboPicker(QDialog):
 
     self.close()
 
-
+  def get_picks(self):
+    """Get the selected combination colours back"""
+    return self.pickerWidget.get_selections()
 
 class ColourCombiner(QWidget):
   """ Widget to show a list of colour swatches and pick several of them.

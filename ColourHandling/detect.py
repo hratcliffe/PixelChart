@@ -3,9 +3,8 @@ from . import imageExt
 
 from sklearn.cluster import KMeans
 from skimage import feature
-from PIL import Image, ImageOps
+from PIL import ImageOps
 
-from math import floor
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
