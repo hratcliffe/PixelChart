@@ -1,3 +1,11 @@
+22/3/25 - v1.1
+  Minor fixes to UI
+    Fixes scrolling and display of key and Combiner
+  Add emphasize option
+    This puts more colour selections into the chosen 'band'
+      Includes R, G, B, bright, shade etc
+      Tuning is still WIP - it does not always identify the band as well as one would like
+
 15/3/25 - v1.0
   Update for QT6
 
