@@ -87,7 +87,7 @@ class ImageHandler(QObject):
       keyItem.setFont(QFont("Arial", 10))
       
       badgeMap = item[2].toqpixmap()
-      badgeMap = badgeMap.scaled(50, 50, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.FastTransformation)
+      badgeMap = badgeMap.scaled(50, 20, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.FastTransformation)
       keyBadge = QLabel()
       keyBadge.setPixmap(badgeMap)
       keyBadge.adjustSize()

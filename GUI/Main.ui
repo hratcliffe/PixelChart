@@ -197,32 +197,15 @@
             <height>398</height>
            </rect>
           </property>
-          <widget class="QPushButton" name="pushButton_3">
-           <property name="geometry">
-            <rect>
-             <x>0</x>
-             <y>410</y>
-             <width>113</width>
-             <height>32</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Backstitch</string>
-           </property>
-          </widget>
-          <widget class="QGroupBox" name="key_box">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>0</y>
-             <width>131</width>
-             <height>351</height>
-            </rect>
-           </property>
-           <property name="title">
-            <string>Key</string>
-           </property>
-          </widget>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QGroupBox" name="key_box">
+             <property name="title">
+              <string>Key</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </widget>
        </item>
