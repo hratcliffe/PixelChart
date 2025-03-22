@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QDialog, QGridLayout, QPushButton, QVBoxLayout, QScrollArea
+from PyQt6.QtWidgets import QDialog, QGridLayout, QPushButton, QVBoxLayout, QScrollArea, QLabel
 
 from .colour_comparator import ColourComparator
 from .colour_combiner import ColourPicker
@@ -85,20 +85,33 @@ class CombinerDialog(QDialog):
   def __init__(self, image, callback):
     super(CombinerDialog, self).__init__()
 
-    # Sort colour list into some sort of order. For user ease we want similar colours to be close
-    # together, as these are likely to be the ones one wants to merge
-    self._colours = sorted(image.getColours(), key = lambda c: calculateDistanceRef(c)) # ToDO - colour value-y sort?
+    #Limit to say 200 colours
+    _max_show = 200
+    _the_len = len(image.getColours())
+    if _the_len > _max_show:
+      self.setWindowTitle("ERROR: Too many colours!")
 
-    self.setWindowTitle("Select a colour to combine:")
+      self.layout = QGridLayout()
 
-    # Picker widget
-    self.pickerWidget = ColourPicker(self._colours, callback)
-    self.layout = QGridLayout()
+      lab = QLabel("Too many ({}) colours (limit {}). Please reduce first".format(_the_len, _max_show))
+      self.layout.addWidget(lab)
 
-    self.scroller = QScrollArea()
-    self.layout.addWidget(self.scroller, 0,0)
-    self.scroller.setWidget(self.pickerWidget)
-    self.scroller.setWidgetResizable(True)
+    else:
+      # Sort colour list into some sort of order. For user ease we want similar colours to be close
+      # together, as these are likely to be the ones one wants to merge
+      self._colours = sorted(image.getColours(), key = lambda c: calculateDistanceRef(c)) # ToDO - colour value-y sort?
+
+      self.setWindowTitle("Select a colour to combine:")
+
+      # Picker widget
+      self.pickerWidget = ColourPicker(self._colours, callback)
+      self.layout = QGridLayout()
+
+      self.scroller = QScrollArea()
+      self.layout.addWidget(self.scroller, 0,0)
+      self.scroller.setWidget(self.pickerWidget)
+      self.scroller.setWidgetResizable(True)
+
 
     # Button controls
     self.done_butt = QPushButton()
