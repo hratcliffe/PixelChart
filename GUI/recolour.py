@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QDialog, QGridLayout, QPushButton, QVBoxLayout
+from PyQt6.QtWidgets import QDialog, QGridLayout, QPushButton, QVBoxLayout, QScrollArea
 
 from .colour_comparator import ColourComparator
 from .colour_combiner import ColourPicker
@@ -89,10 +89,16 @@ class CombinerDialog(QDialog):
     # together, as these are likely to be the ones one wants to merge
     self._colours = sorted(image.getColours(), key = lambda c: calculateDistanceRef(c)) # ToDO - colour value-y sort?
 
+    self.setWindowTitle("Select a colour to combine:")
+
     # Picker widget
     self.pickerWidget = ColourPicker(self._colours, callback)
     self.layout = QGridLayout()
-    self.layout.addWidget(self.pickerWidget, 0,0)
+
+    self.scroller = QScrollArea()
+    self.layout.addWidget(self.scroller, 0,0)
+    self.scroller.setWidget(self.pickerWidget)
+    self.scroller.setWidgetResizable(True)
 
     # Button controls
     self.done_butt = QPushButton()
