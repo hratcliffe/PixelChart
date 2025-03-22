@@ -126,8 +126,10 @@ def fill_colour_combos(window):
   window.emphasize_select.addItem("Red", 'r')
   window.emphasize_select.addItem("Blue", 'b')
   window.emphasize_select.addItem("Green", 'g')
-  window.emphasize_select.addItem("Brights", 'i')
+  window.emphasize_select.addItem("Bright", 'i')
   window.emphasize_select.addItem("Shade", 's')
+  window.emphasize_select.addItem("Bold", 't') #sTrong colour
+
 
   brands = listBrands()
   window.palette_select.addItem("None", None)

@@ -22,7 +22,7 @@ def mergeColours(imageIn, n_cols=20, emph=None, mode='RGB'):
   if emph:
     if emph in ['r', 'g', 'b']:
       weights = calculateWeightsForColour(data, sz, emph, mode=mode)
-    elif emph in ['s', 'i']:
+    elif emph in ['s', 'i', 't']:
       weights = calculateWeightsForChannel(data, sz, emph)
     else:
       raise ValueError("Bad Emphasis Value {}".format(emph))
@@ -66,7 +66,7 @@ def mergeColoursEmphasized(imageIn, n_cols=20, emph=None, mode='RGB'):
   # NOTE: this does run clustering 3 times as opposed to 1
 
   #Emph not present or not known
-  if not emph or (emph not in ['r', 'g', 'b', 's', 'i']):
+  if not emph or (emph not in ['r', 'g', 'b', 's', 'i', 't']):
     return mergeColours(imageIn, n_cols)
 
   # Temporary image as 1-d array of colours
@@ -91,7 +91,7 @@ def mergeColoursEmphasized(imageIn, n_cols=20, emph=None, mode='RGB'):
         isIn = isPrimaryRGB(item, emph)
       elif mode == 'LAB':
         isIn = isPrimaryLAB(item, emph)
-    elif emph in ['s', 'i']:
+    elif emph in ['s', 'i', 't']:
       isIn = isCharacter(item, emph, mode)
     else:
       isIn = False # TODO fix this
