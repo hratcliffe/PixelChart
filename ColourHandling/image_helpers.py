@@ -1,3 +1,4 @@
+# Module handling some extra image stuff such as space transforms
 from PIL import ImageCms
 
 # Handles image mode conversion for PIL images

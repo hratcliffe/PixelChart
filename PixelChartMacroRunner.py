@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow
-from PyQt5.uic import loadUi
-from PyQt5.QtCore import pyqtSlot
+from PyQt6.QtWidgets import QApplication, QMainWindow
+from PyQt6.uic import loadUi
+from PyQt6.QtCore import pyqtSlot
 #Is QT application to use signalling system as the rest of the code does
 # This allows GUI for filename input and progress tracker etc
 
@@ -59,7 +59,7 @@ def main(args):
 
   window.macro_file.editingFinished.connect(window.macro_entered)
 
-  app.exec_()
+  app.exec()
 
 
 if __name__ == "__main__":

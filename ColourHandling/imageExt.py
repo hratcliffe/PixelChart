@@ -1,3 +1,4 @@
+# Module defining imageExt class and some simple functions it needs
 from . import detect, replace
 from .image_helpers import imageModeHelper
 
@@ -29,7 +30,7 @@ class imageExt:
   def resize(self, width, height):
   
     
-    new_image = self.coreImage.resize((width, height), Image.ANTIALIAS)
+    new_image = self.coreImage.resize((width, height), Image.Resampling.LANCZOS)
     self.setImage(new_image)
 
     
@@ -53,6 +54,12 @@ class imageExt:
     
     return self
   
+  def getColourSpace(self):
+    """Get colourSpace: either RGB or LAB valid"""
+
+    if self.optImageInUse: return 'LAB'
+    return 'RGB'
+
   def getImage(self, opt= None):
 
     if opt is not None and opt is False:
@@ -99,6 +106,11 @@ class imageExt:
       im, counts = extractRunAndCounts(pixels, newIm.size)
       self.runImage = im
       self.colourCounts = counts
+  
+  
+  def getColours(self):
+    """ Get list of all colours in image"""
+    return list(self.colourMap[0].keys())
 
   def show(self):
   

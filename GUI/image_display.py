@@ -1,6 +1,6 @@
-from PyQt5.QtGui import QFont
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtWidgets import QGridLayout, QLabel
+from PyQt6.QtGui import QFont
+from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot, Qt
+from PyQt6.QtWidgets import QGridLayout, QLabel
 from PIL import ImageQt
 
 from ColourHandling import imageExt
@@ -11,6 +11,8 @@ from Graphics.pattern import PatternGenerator
 from SharedData.types import *
 from .warnings import PresaveDialog
 from .recolour import RecolourDialog
+
+# TODO This is a bit of a God object. Should some functions be delegated to something else?
 
 class ImageHandler(QObject):
   image_changed = pyqtSignal(ImageStatePayload, name="image_changed")
@@ -32,25 +34,33 @@ class ImageHandler(QObject):
     
     self.cChart = colourChart()
 
+  def check_for_image(self):
+    return self.full_image is not None
+  
+  def get_image(self):
+    if(self.full_image):
+      return self.full_image
+    else:
+      raise ValueError
     
   def show_image_from_file(self, filename):
 
     self.full_image = imageExt.imageFromFile(filename)
-    self.change_image(self.full_image)  
-  
+    self.change_image(self.full_image)
+
   def change_image(self, new_image):
-    
+
     self.full_image = new_image
 
     if self.has_display:
-    
+
       pixmap = self.full_image.getImage(opt=False).toqpixmap()
       sz = pixmap.size()
       sz_b = pixmap.size()
       port_sz = self.pane.viewport().size()
-      sz.scale(port_sz, Qt.KeepAspectRatio)
+      sz.scale(port_sz, Qt.AspectRatioMode.KeepAspectRatio)
       scl = 0.95  #Scale down slightly to accomodate borders and things
-      pixmap = pixmap.scaled(sz.width()*scl, sz.height()*scl, Qt.KeepAspectRatio, Qt.FastTransformation)
+      pixmap = pixmap.scaled(int(sz.width()*scl), int(sz.height()*scl), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.FastTransformation)
 
       self.image_hook.setPixmap(pixmap)
       self.image_hook.adjustSize()
@@ -64,7 +74,7 @@ class ImageHandler(QObject):
 
     # Make sure this is backing image size, NOT pixmap size
     self.image_changed.emit(ImageStatePayload(sz_b, im_cols))
-    
+
   def show_key(self, changed=False):
 
 
@@ -89,7 +99,7 @@ class ImageHandler(QObject):
       keyItem.setFont(QFont("Arial", 10))
       
       badgeMap = item[2].toqpixmap()
-      badgeMap = badgeMap.scaled(50, 50, Qt.KeepAspectRatio, Qt.FastTransformation)
+      badgeMap = badgeMap.scaled(50, 20, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.FastTransformation)
       keyBadge = QLabel()
       keyBadge.setPixmap(badgeMap)
       keyBadge.adjustSize()
@@ -105,8 +115,11 @@ class ImageHandler(QObject):
 
   def modify_image(self, image, change_payload):
     """Modify the given image according to the given ImageChangePayload"""
-  
-    reduceColours(image, change_payload.n_cols)
+
+    if(change_payload.opts["Emphasize"] != '0'):
+      reduceColours(image, n_cols=change_payload.n_cols, emph=change_payload.opts["Emphasize"])
+    else:
+      reduceColours(image, n_cols=change_payload.n_cols)
 
     recolourD = RecolourDialog(change_payload.opts["Palette"])
     try:
@@ -122,6 +135,33 @@ class ImageHandler(QObject):
     
     self.change_image(image)
 
+  def enhance_image(self, image, enhance_payload):
+    """Modify the given image according to the given ImageEnhancePayload"""
+
+    # Simple divide-by-zero protection below so use this if to ensure no change in value -> no change in image
+    if(enhance_payload.newValue == enhance_payload.oldValue): return
+
+    # TODO sensible scaling from say 0.1 to 10x???
+    if(enhance_payload.attr == "br"):
+        new_bright = enhance_payload.newValue/(enhance_payload.oldValue+1)
+        adjustBrightness(image, new_bright)
+    elif(enhance_payload.attr == "co"):
+        new_con = enhance_payload.newValue/(enhance_payload.oldValue+1)
+        adjustContrast(image, new_con)
+    elif(enhance_payload.attr == "sat"):
+        new_sat = enhance_payload.newValue/(enhance_payload.oldValue+1)
+        adjustSaturation(image, new_sat)
+    else:
+        raise ValueError("Invalid enhancement {}".format(enhance_payload.attr))
+
+    self.change_image(image)
+
+  def modify_image_advanced(self, image, combine_payload):
+    """Modify the given image according to the given ImageCombinePayload"""
+  
+    recolourFromList(image, combine_payload.new, combine_payload.original)
+    self.change_image(image)
+    
 
   def resize_image(self, image, resize_payload):
     """Modify the given image according to the given ImageResizePayload"""
@@ -139,15 +179,24 @@ class ImageHandler(QObject):
     checkDialog.fill_settings(checks["settings"])
     checkDialog.show()
 
-    return checkDialog.exec_() 
+    return checkDialog.exec() 
     
   @pyqtSlot(ImageChangePayload)
   def on_image_change_request(self, value):
-    self.modify_image(self.full_image, value)
-
+    if self.full_image:
+      self.modify_image(self.full_image, value)
+  @pyqtSlot(ImageEnhancePayload)
+  def on_image_enhance_request(self, value):
+    if self.full_image:
+      self.enhance_image(self.full_image, value)
+  @pyqtSlot(ImageCombinePayload)
+  def on_image_combine_request(self, value):
+    if self.full_image:
+      self.modify_image_advanced(self.full_image, value)
   @pyqtSlot(ImageSizePayload)
   def on_image_resize_request(self, value):
-    self.resize_image(self.full_image, value)
+    if self.full_image:
+      self.resize_image(self.full_image, value)
 
 
   @pyqtSlot(str)

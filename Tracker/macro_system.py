@@ -1,5 +1,5 @@
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QProgressDialog
+from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot
+from PyQt6.QtWidgets import QProgressDialog
 
 from SharedData.types import *
 from GUI.image_display import ImageHandler

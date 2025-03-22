@@ -94,4 +94,37 @@ class ColourRemapPayload():
   def to_json(self):
     return self.as_dict()
 
+#TODO rename?
+class ImageCombinePayload():
+  """Colour combining information"""
+  def __init__(self, original, new):
+    self.original = original
+    self.new = new
+
+  def __str__(self):
+    return "ImageCombine: [original={}, new={}]".format(self.original, self.new)
+  def __repr__(self):
+    return "ImageCombinePayload({},{})".format(self.original, self.new)
+
+  def as_dict(self):
+    return{"name":"ImageCombinePayload", "original":self.original, "new":self.new}
+  def to_json(self):
+    return self.as_dict()
+
+class ImageEnhancePayload():
+  """Information on an image enhancement"""
+  def __init__(self, attr, old, new):
+    self.attr = attr
+    self.oldValue = old
+    self.newValue = new
+
+  def __str__(self):
+    return "ImageEnhance: [property={}, oldValue={}, newValue={}]".format(self.attr, self.oldValue, self.newValue)
+  def __repr__(self):
+    return "ImageEnhancePayload({},{},{})".format(self.attr, self.oldValue, self.newValue)
+
+  def as_dict(self):
+    return{"name":"ImageEnhancePayload", "attr":self.attr, "oldValue":self.oldValue, "newValue":self.newValue}
+  def to_json(self):
+    return self.as_dict()
 

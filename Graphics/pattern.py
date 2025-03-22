@@ -1,8 +1,8 @@
-from PyQt5.QtGui import QPixmap, QImage, QPainter, QFont, QIcon
-from PyQt5.QtWidgets import QGraphicsView, QGridLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView, QProgressDialog
-from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
-import PyQt5.QtCore as qtc
-from PyQt5.QtCore import QSize, QRect
+from PyQt6.QtGui import QPixmap, QImage, QPainter, QFont, QIcon
+from PyQt6.QtWidgets import QGraphicsView, QGridLayout, QLabel, QTableWidget, QTableWidgetItem, QHeaderView, QProgressDialog
+from PyQt6.QtPrintSupport import QPrintDialog, QPrinter
+import PyQt6.QtCore as qtc
+from PyQt6.QtCore import QSize, QRect
 
 from PIL import ImageQt
 
@@ -10,16 +10,23 @@ from ColourHandling import *
 from XStitchHeuristics import *
 
 class PatternGenerator:
-
+  """ Create a pattern output.
+  This checks for validity of pattern to produce and warns of suspicious stuff
+  (image too large, too many colours for sensible pattern)
+  """
   def __init__(self):
+    # Maximum size of image to consider "normal"
     self.max_sz = (200, 200)
+    # Maximum number of colours to consider normal. Should be less than maximum number
+    # of distinct symbols available for symbolic pattern
     self.max_colours = 50
-    
+
     self.o_scl = 0.8
 
   def checks(self, details, im_sz, im_cols):
-    # Show pattern details and verify anything "suspicious"
-            
+    """ Summarize pattern details and produce warnings for anything suspicious
+    """
+
     warnings = []
 
     if im_sz[0] > self.max_sz[0] or im_sz[1] > self.max_sz[1]:
@@ -27,7 +34,7 @@ class PatternGenerator:
 
     if im_cols > self.max_colours:
       warnings.append("Number of colours is very large ({}). Symbolic pattern will have repeats!".format(im_cols))
-      
+
     setts = []
 
     if details["Symbols"]:
@@ -45,7 +52,7 @@ class PatternGenerator:
       setts.append("Producing Final Size at Gauge {}".format(details["Gauge"]))
     if details["LengthEstimates"]:
       setts.append("Producing Thread Length Estimates at Gauge {}".format(details["Gauge"]))
-    
+
     if not setts:
       setts.append("No Settings To Report")
 
@@ -55,21 +62,24 @@ class PatternGenerator:
     return {"settings":setts, "warnings":warnings}
 
   def rescale_to_page(self, pixmap, o_sz):
-
+    """Rescale image ensuring pixelation retained"""
     sz = pixmap.size()
-    sz.scale(o_sz, qtc.Qt.KeepAspectRatio)
+    sz.scale(o_sz, qtc.Qt.AspectRatioMode.KeepAspectRatio)
     sz = sz*self.o_scl
     # Must scale pixmap manually to ensure transform is fast style, to retain pixelation
-    return pixmap.scaled(sz.width()*self.o_scl, sz.height()*self.o_scl, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+    return pixmap.scaled(int(sz.width()*self.o_scl), int(sz.height()*self.o_scl), qtc.Qt.AspectRatioMode.KeepAspectRatio, qtc.Qt.TransformationMode.FastTransformation)
 
 
   def get_size_text(self, im_sz, gg):
+    """Create message summarizing piece pattern would create"""
 
     sz = estimateSize(im_sz, gg)
     mess = "{} by {} stitches, approx {}cm by {}cm at gauge {}".format(im_sz[0], im_sz[1], round(sz['cm'][0], 1), round(sz['cm'][1], 1), gg)
     return mess
 
   def make_key_table(self, do_codes, key):
+    """Create a table for the colours in given key, including RGB codes if do_codes is set
+    """
 
     if do_codes:
       #4 items, 2 sets, plus one padding
@@ -82,38 +92,38 @@ class PatternGenerator:
     row = 0
     col = 0
     tbl.setColumnCount(col_cnt)
-    tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+    tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
 
     tbl.horizontalHeader().hide()
     tbl.verticalHeader().hide()
 
     for item in key:
       tbl.setRowCount(row+1)
-      
+
       tbl.setItem(row, col, QTableWidgetItem(" ".join(item[4])))
       col = col + 1
 
-      badgeMap = item[2].toqpixmap().scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+      badgeMap = item[2].toqpixmap().scaled(50, 50, qtc.Qt.AspectRatioMode.KeepAspectRatio, qtc.Qt.TransformationMode.FastTransformation)
       tbl.setItem(row, col, QTableWidgetItem())
       tbl.item(row, col).setIcon(QIcon(badgeMap))
 
       col = col + 1
 
-      symMap = item[3].toqpixmap().scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+      symMap = item[3].toqpixmap().scaled(50, 50, qtc.Qt.AspectRatioMode.KeepAspectRatio, qtc.Qt.TransformationMode.FastTransformation)
       tbl.setItem(row, col, QTableWidgetItem())
       tbl.item(row, col).setIcon(QIcon(symMap))
       col = col + 1
 
       if do_codes:
-        tbl.setItem(row, col, QTableWidgetItem(str(item[0])))
+        tbl.setItem(row, col, QTableWidgetItem(str(item[0][0:3])))
         col = col + 1
-          
+
       col = col+1
 
       if col > col_cnt-1:
         col = 0
         row = row + 1
-    
+
     tbl_sz = tbl.size()
     tbl.setMaximumSize(tbl_sz)
     tbl.setMinimumSize(tbl_sz)
@@ -121,20 +131,26 @@ class PatternGenerator:
     return tbl
 
   def make_colour_table(self, do_colours, do_lengths, image, key, cChart, gauge):
+    """Create a table for the colours in given key, including colour names and
+    estimates of length required if do_colours and do_lengths are true respectively.
+    Colour names require a cChart mapping RGB codes to names
+    Lengths requires the image (to count pixels) and a gauge selection (to size stitches)
+    """
 
     col_per = 2
     if do_colours:
-      col_per = col_per + 2
-    elif do_lengths:
+      col_per = col_per + 3
+    if do_lengths:
       col_per = col_per + 1
 
-    col_cnt = col_per * 3 - 1
+    col_cnt = col_per * 2 - 1
 
     tbl = QTableWidget()
     row = 0
     col = 0
     tbl.setColumnCount(col_cnt)
-    tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+    tbl.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+    tbl.horizontalHeader().setStretchLastSection(True)
 
     tbl.horizontalHeader().hide()
     tbl.verticalHeader().hide()
@@ -142,8 +158,8 @@ class PatternGenerator:
     for item in key:
       tbl.setRowCount(row+1)
 
+      symMap = item[3].toqpixmap().scaled(50, 50, qtc.Qt.AspectRatioMode.KeepAspectRatio, qtc.Qt.TransformationMode.FastTransformation)
 
-      symMap = item[3].toqpixmap().scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
       tbl.setItem(row, col, QTableWidgetItem())
       tbl.item(row, col).setIcon(QIcon(symMap))
       col = col + 1
@@ -157,7 +173,7 @@ class PatternGenerator:
         col = col + 1
 
         symMap = makeSwatch(colour.rgb).toqpixmap()
-        symMap = symMap.scaled(50, 50, qtc.Qt.KeepAspectRatio, qtc.Qt.FastTransformation)
+        symMap = symMap.scaled(50, 50, qtc.Qt.AspectRatioMode.KeepAspectRatio, qtc.Qt.TransformationMode.FastTransformation)
         tbl.setItem(row, col, QTableWidgetItem())
         tbl.item(row, col).setIcon(QIcon(symMap))
         col = col + 1
@@ -172,7 +188,7 @@ class PatternGenerator:
       if col > col_cnt-1:
         col = 0
         row = row + 1
-    
+
     tbl_sz = tbl.size()
     tbl.setMaximumSize(tbl_sz)
     tbl.setMinimumSize(tbl_sz)
@@ -181,39 +197,40 @@ class PatternGenerator:
 
 
   def save(self, filename, details, image, key, cChart):
-        
+    """Save a pattern file as PDF, with options as given in details dict"""
+
     progress = QProgressDialog("Saving Pattern", "Abort", 0, 4)
-    progress.setWindowModality(qtc.Qt.WindowModal)
+    progress.setWindowModality(qtc.Qt.WindowModality.WindowModal)
     progress.forceShow()
-                    
-    printer = QPrinter(QPrinter.HighResolution)
-    printer.setOutputFormat(QPrinter.PdfFormat)
+
+    printer = QPrinter(QPrinter.PrinterMode.HighResolution)
+    printer.setOutputFormat(QPrinter.OutputFormat.PdfFormat)
     printer.setOutputFileName(filename)
-    
+
     painter = QPainter()
     painter.begin(printer)
     # Colour image
-    
+
     rect = painter.viewport()
     o_sz = rect.size()
 
     # Draw title and header text
-    painter.drawText(QRect(0, 0, o_sz.width(), o_sz.height()/40), qtc.Qt.AlignCenter, details["PTitle"])
-    painter.drawText(QRect(0, o_sz.height()/40, o_sz.width(), o_sz.height()/20), qtc.Qt.AlignCenter, details["PText"])
+    painter.drawText(QRect(0, 0, o_sz.width(), int(o_sz.height()/40)), qtc.Qt.AlignmentFlag.AlignCenter, details["PTitle"])
+    painter.drawText(QRect(0, int(o_sz.height()/40), o_sz.width(), int(o_sz.height()/20)), qtc.Qt.AlignmentFlag.AlignCenter, details["PText"])
 
     if details["FinalSize"]:
       mess = self.get_size_text(image.getImage(opt=False).size, details["Gauge"])
-      painter.drawText(QRect(0, o_sz.height()/20, o_sz.width(), 3*o_sz.height()/40), qtc.Qt.AlignCenter, mess)
+      painter.drawText(QRect(0, int(o_sz.height()/20), o_sz.width(), int(3*o_sz.height()/40)), qtc.Qt.AlignmentFlag.AlignCenter, mess)
 
     # Colour image
     pixmap = self.rescale_to_page(image.getImage(opt=False).toqpixmap(), o_sz)
     rect.setSize(pixmap.size())
     # Move down. If landscape, will centre in width, portrait will centre in height. Other dimension will still fit
-    painter.translate(o_sz.width()*(1-self.o_scl)/2, o_sz.height()*(1-self.o_scl)/2)
+    painter.translate(int(o_sz.width()*(1-self.o_scl)/2), int(o_sz.height()*(1-self.o_scl)/2))
     painter.drawPixmap(rect, pixmap)
-    
+
     progress.setValue(1)
-    
+
     if details["Symbols"] and not progress.wasCanceled():
       printer.newPage()
 
@@ -221,38 +238,43 @@ class PatternGenerator:
       pixmap = self.rescale_to_page(toSymbolicImage(image).getImage(opt=False).toqpixmap(), o_sz)
       rect.setSize(pixmap.size())
       painter.drawPixmap(rect, pixmap)
-    
+
     progress.setValue(2)
 
     if details["Key"] or details["ColourNumbers"] or details["LengthEstimates"]:
       printer.newPage()
 
-    # Create key    
+    # Create key
+    k_tbl_sz = None
     if details["Key"] and not progress.wasCanceled():
-    
+      # Seem to need this save and restore to get both tables - This suggests a bug?
+      painter.save()
       tbl = self.make_key_table(details["RGBCodes"], key)
       tbl_sz = tbl.size()
-    
+      k_tbl_sz = tbl_sz
       out_scale = min(rect.width()/tbl_sz.width(), rect.height()/tbl_sz.height())*0.95
       painter.scale(out_scale, out_scale)
       tbl.render(painter)
-
+      painter.restore()
     progress.setValue(3)
-    
+
     # Handle descriptors
-    
+
     # Reprint key without names, but with codes (if requested) and lengths (if requested). Only do this if one of those options was requested
     if (details["ColourNumbers"] or details["LengthEstimates"]) and not progress.wasCanceled():
-    
+
       tbl = self.make_colour_table(details["ColourNumbers"], details["LengthEstimates"], image, key, cChart, details["Gauge"])
       tbl_sz = tbl.size()
-      # Move down below previous table. 
-      painter.translate(0, tbl_sz.height())
+      # Move down below previous table.
+      out_scale = min(rect.width()/tbl_sz.width(), rect.height()/tbl_sz.height())*0.95
+      painter.scale(out_scale, out_scale)
+      if(k_tbl_sz is not None):
+          painter.translate(0, k_tbl_sz.height())
       tbl.render(painter)
 
     progress.setValue(4)
 
-    
+
     painter.end()
     print("Pattern Complete")
-    
+
