@@ -29,6 +29,7 @@ class ImageHandler(QObject):
     self.image_hook = window.image_hook
     self.key_pane = window.key_box
     self.full_image = None
+    self.pixmap_scl = 1.0
     self.key_layout = None
     self.key = None
     self.pGen = PatternGenerator()
@@ -211,7 +212,8 @@ class ImageHandler(QObject):
   def eventFilter(self, widget, event):
     if event.type() == QEvent.Type.MouseButtonPress:
       pos = event.position()
-      self.showColourAtPosition(pos)
+      if self.full_image:
+        self.showColourAtPosition(pos)
 
     return super().eventFilter(widget, event)
 
@@ -223,7 +225,7 @@ class ImageHandler(QObject):
 
     colour = self.full_image.getColourAt(n_pos)
     if colour:
-      swatch = QPixmap(100, 20)
+      swatch = QPixmap(50, 20)
       swatch.fill(QColor(colour[0], colour[1], colour[2]))
       self.colourPatch.setPixmap(swatch)
 
