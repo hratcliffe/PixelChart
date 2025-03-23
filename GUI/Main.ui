@@ -240,7 +240,7 @@
         <number>5</number>
        </property>
        <item row="0" column="2">
-        <widget class="QGroupBox" name="groupBox_3">
+        <widget class="QGroupBox" name="extras_box">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
            <horstretch>0</horstretch>
@@ -306,7 +306,7 @@
         </widget>
        </item>
        <item row="0" column="4" rowspan="2">
-        <widget class="QGroupBox" name="groupBox_8">
+        <widget class="QGroupBox" name="extensions_box">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -324,7 +324,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>
-           <widget class="QLabel" name="label_5">
+           <widget class="QLabel" name="gauge_label">
             <property name="text">
              <string>Gauge</string>
             </property>
@@ -350,7 +350,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="filename_box">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
            <horstretch>0</horstretch>
@@ -380,7 +380,7 @@
            <number>5</number>
           </property>
           <item>
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="filename_label">
             <property name="text">
              <string>Filename:</string>
             </property>
@@ -400,7 +400,7 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QGroupBox" name="groupBox_2">
+        <widget class="QGroupBox" name="pattern_box">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
            <horstretch>0</horstretch>
@@ -424,7 +424,7 @@
            <number>5</number>
           </property>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_3">
+           <widget class="QLabel" name="pattern_text_label">
             <property name="text">
              <string>Pattern Text:</string>
             </property>
@@ -456,7 +456,7 @@
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label_4">
+           <widget class="QLabel" name="pattern_title_label">
             <property name="text">
              <string>Pattern Title:</string>
             </property>
@@ -485,6 +485,10 @@
            </widget>
           </item>
          </layout>
+         <zorder>pattern_title_label</zorder>
+         <zorder>pattern_text_label</zorder>
+         <zorder>pattern_title_edit</zorder>
+         <zorder>pattern_text_edit</zorder>
         </widget>
        </item>
        <item row="1" column="2">
@@ -527,14 +531,14 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QLabel" name="label_6">
+           <widget class="QLabel" name="resize_label">
             <property name="text">
              <string>Resize:</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QGroupBox" name="resize_1">
+           <widget class="QGroupBox" name="resize_width">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -625,14 +629,14 @@
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_7">
+           <widget class="QLabel" name="resize_mid_label">
             <property name="text">
              <string>by</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QGroupBox" name="resize_2">
+           <widget class="QGroupBox" name="resize_height">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -755,7 +759,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QGroupBox" name="groupBox_9">
+        <widget class="QGroupBox" name="adjustment_box">
          <property name="title">
           <string/>
          </property>
@@ -888,7 +892,7 @@
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="label_8">
+           <widget class="QLabel" name="brightLabel">
             <property name="text">
              <string>Brightness</string>
             </property>
@@ -898,7 +902,7 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_12">
+           <widget class="QLabel" name="contLabel">
             <property name="text">
              <string>Contrast</string>
             </property>
@@ -908,7 +912,7 @@
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="label_15">
+           <widget class="QLabel" name="satLabel">
             <property name="text">
              <string>Saturation</string>
             </property>
@@ -928,7 +932,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_10">
+        <widget class="QGroupBox" name="current_box">
          <property name="title">
           <string/>
          </property>
@@ -946,7 +950,7 @@
            <number>5</number>
           </property>
           <item>
-           <widget class="QLabel" name="label_13">
+           <widget class="QLabel" name="current_label">
             <property name="text">
              <string>Image Colours:</string>
             </property>
@@ -963,7 +967,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_4">
+        <widget class="QGroupBox" name="reduction_box">
          <property name="title">
           <string/>
          </property>
@@ -987,7 +991,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QLabel" name="label_9">
+           <widget class="QLabel" name="reduction_label">
             <property name="text">
              <string>Reduce To:</string>
             </property>
@@ -1004,7 +1008,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_11">
+        <widget class="QGroupBox" name="palette_box">
          <property name="title">
           <string/>
          </property>
@@ -1025,7 +1029,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QLabel" name="label_14">
+           <widget class="QLabel" name="palette_label">
             <property name="text">
              <string>Use Palette:</string>
             </property>
@@ -1038,7 +1042,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_5">
+        <widget class="QGroupBox" name="emphasize_box">
          <property name="title">
           <string/>
          </property>
@@ -1059,7 +1063,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QLabel" name="label_10">
+           <widget class="QLabel" name="emphasize_label">
             <property name="text">
              <string>Emphasize:</string>
             </property>
@@ -1072,7 +1076,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_7">
+        <widget class="QGroupBox" name="colour_specials_box">
          <property name="title">
           <string/>
          </property>
