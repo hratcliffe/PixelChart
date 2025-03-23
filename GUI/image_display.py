@@ -223,7 +223,7 @@ class ImageHandler(QObject):
 
     self.change_image(image)
 
-  def modify_image_advanced(self, image, combine_payload):
+  def modify_image_combine(self, image, combine_payload):
     """Modify the given image according to the given ImageCombinePayload"""
 
     recolourFromList(image, combine_payload.new, combine_payload.original)
@@ -259,7 +259,7 @@ class ImageHandler(QObject):
   @pyqtSlot(ImageCombinePayload)
   def on_image_combine_request(self, value):
     if self.full_image:
-      self.modify_image_advanced(self.full_image, value)
+      self.modify_image_combine(self.full_image, value)
   @pyqtSlot(ImageSizePayload)
   def on_image_resize_request(self, value):
     if self.full_image:
