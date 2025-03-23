@@ -16,6 +16,7 @@ from math import floor
 
 _max_key_items = 20
 
+_mask_colour = (158, 0, 158)
 
 # TODO This is a bit of a God object. Should some functions be delegated to something else?
 
@@ -30,6 +31,8 @@ class ImageHandler(QObject):
     self.key_pane = window.key_box
     self.full_image = None
     self.pixmap_scl = 1.0
+    self.display_image = None
+    self._highlight = None
     self.key_layout = None
     self.key = None
     self.pGen = PatternGenerator()
@@ -56,11 +59,61 @@ class ImageHandler(QObject):
     self.full_image = imageExt.imageFromFile(filename)
     self.change_image(self.full_image)
 
-  def change_image(self, new_image):
+  def update_masking(self, add=None, remove=None, replace=None):
+    # Update masked area in displayed image, and store list of masked pixels
+    # Can supply any of add, remove or replace as a list of points. Priority is
+    # replace: others ignored
+    # add then remove: if something in both it will end up _removed_
+
+    if replace:
+      for pos in replace:
+        self.display_pix[pos.x(), pos.y()] = _mask_colour
+      self._highlight = replace
+    else:
+      if add:
+        for pos in add:
+          self.display_pix[pos.x(), pos.y()] = _mask_colour
+        if self._highlight:
+          self._highlight = self._highlight + add
+        else:
+          self._highlight = add
+      if remove:
+        for pos in remove:
+          try:
+            self._highlight.remove(pos)
+            colour = self.full_image.getColourAt(pos)
+            self.display_pix[pos.x(), pos.y()] = colour
+          except Exception as e:
+            print("Error updating mask: {}".format(e.what()))
+
+  def change_image(self, new_image, keep_mask=True):
+
+    #This will replace the image and the display image will be refreshed from it
+    # To _preserve_ highlighting, set keep_mask=True which will re-use the stored _highlight
+    #to be shown in _mask_colour
+    # keep_mask = False will clear the mask and leave image unselected
+
+    #TODO - storing scaling like this will break if window is resized
 
     self.full_image = new_image
 
-    pixmap = self.full_image.getImage(opt=False).toqpixmap()
+    #Copy of image for use with masking
+    self.display_image = new_image.getImage(opt=False).copy()
+    self.display_pix = self.display_image.load()
+
+    if not keep_mask:
+      self._highlight = None
+
+    # TEST CODE
+    #new_mask = [QPointF(50, 50), QPointF(51,51), QPointF(51,50)]
+    #self._highlight = new_mask
+
+    # If image has changed and mask is present, re-do
+    if self._highlight:
+      self.update_masking(replace = self._highlight)
+
+    pixmap = self.display_image.toqpixmap()
+
     sz = pixmap.size()
     sz_b = pixmap.size()
     port_sz = self.pane.viewport().size()
@@ -80,6 +133,27 @@ class ImageHandler(QObject):
 
     # Make sure this is backing image size, NOT pixmap size
     self.image_changed.emit(ImageStatePayload(sz_b, im_cols))
+
+  def refresh_display(self):
+    #Minimal refresh to re-show the display image. Suitable for masking selection
+    # DOES NOT trigger image change code
+
+    #TODO make this minimal effort - don't allow scaling to change?
+
+    pixmap = self.display_image.toqpixmap()
+
+    sz = pixmap.size()
+    port_sz = self.pane.viewport().size()
+    sz.scale(port_sz, Qt.AspectRatioMode.KeepAspectRatio)
+    scl = 0.95  #Scale down slightly to accomodate borders and things
+    pixmap = pixmap.scaled(int(sz.width()*scl), int(sz.height()*scl), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.FastTransformation)
+
+    self.image_hook.setPixmap(pixmap)
+    self.image_hook.adjustSize()
+    self.image_hook.show()
+
+    #Store relative scale between image and pixmap
+    self.pixmap_scl = self.full_image.size()[0]/pixmap.size().width()
 
   def show_key(self, changed = False):
 
@@ -160,7 +234,7 @@ class ImageHandler(QObject):
     """Modify the given image according to the given ImageResizePayload"""
 
     resizeImage(image, resize_payload.width, resize_payload.height)
-    self.change_image(image)
+    self.change_image(image, keep_mask=False)
 
   def pattern_checks(self, details):
     # Show pattern details and verify anything "suspicious"
@@ -213,21 +287,39 @@ class ImageHandler(QObject):
     if event.type() == QEvent.Type.MouseButtonPress:
       pos = event.position()
       if self.full_image:
-        self.showColourAtPosition(pos)
+        n_pos = self.viewportToImagePosition(pos)
+        self.showColourAtPosition(n_pos)
+        self.updateMask(n_pos)
 
     return super().eventFilter(widget, event)
 
-  def showColourAtPosition(self, position):
+  def viewportToImagePosition(self, pos):
+
     #Position relative to image_hook, figures out the scaling and looks up in the ORIGINAL image
-    s_pos = position * self.pixmap_scl
+    s_pos = pos * self.pixmap_scl
     # Floor - select the pixel we're within
     n_pos = QPointF(floor(s_pos.x()), floor(s_pos.y()))
 
-    colour = self.full_image.getColourAt(n_pos)
+    return n_pos
+
+  def showColourAtPosition(self, pos):
+
+    colour = self.full_image.getColourAt(pos)
     if colour:
       swatch = QPixmap(50, 20)
       swatch.fill(QColor(colour[0], colour[1], colour[2]))
       self.colourPatch.setPixmap(swatch)
+
+  def updateMask(self, pos):
+    #Add or remove from mask and update display
+
+    add = True # TODO - hook to selector button state
+    if add:
+      self.update_masking(add=[pos])
+    else:
+      self.update_masking(remove=[pos])
+
+    self.refresh_display()
 
 def clearLayout(layout):
   # From https://stackoverflow.com/questions/4528347/clear-all-widgets-in-a-layout-in-pyqt  or https://stackoverflow.com/a/10067548
