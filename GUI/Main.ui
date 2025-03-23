@@ -152,7 +152,7 @@
            <rect>
             <x>8</x>
             <y>8</y>
-            <width>568</width>
+            <width>574</width>
             <height>382</height>
            </rect>
           </property>
@@ -723,15 +723,114 @@
         </widget>
        </item>
        <item row="2" column="2">
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="swatchGroup">
          <property name="title">
           <string/>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>Selected:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QLabel" name="swatch">
+            <property name="minimumSize">
+             <size>
+              <width>50</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>50</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string/>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton">
+            <property name="toolTip">
+             <string>Select all pixels of this colour</string>
+            </property>
+            <property name="text">
+             <string>All</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButton_2">
+            <property name="toolTip">
+             <string>Grow selection by 1 pixel</string>
+            </property>
+            <property name="text">
+             <string>Grow</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="selectionModeRadio">
+            <property name="title">
+             <string/>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_10">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QRadioButton" name="selectionSelect">
+               <property name="text">
+                <string>Select</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">buttonGroup</string>
+               </attribute>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="selectionDeselect">
+               <property name="text">
+                <string>Deselect</string>
+               </property>
+               <attribute name="buttonGroup">
+                <string notr="true">buttonGroup</string>
+               </attribute>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="4">
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string/>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_11">
+          <item>
+           <widget class="QPushButton" name="recolourSelectionButton">
+            <property name="text">
+             <string>Recolour</string>
             </property>
            </widget>
           </item>
@@ -1155,4 +1254,7 @@
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+ </buttongroups>
 </ui>

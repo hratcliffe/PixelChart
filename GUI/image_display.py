@@ -33,6 +33,7 @@ class ImageHandler(QObject):
     self.pixmap_scl = 1.0
     self.display_image = None
     self._highlight = None
+    self.selectionPick = window.selectionSelect
     self.key_layout = None
     self.key = None
     self.pGen = PatternGenerator()
@@ -79,12 +80,11 @@ class ImageHandler(QObject):
           self._highlight = add
       if remove:
         for pos in remove:
-          try:
+          #Might get remove request due to clicking outside mask!
+          if pos in self._highlight:
             self._highlight.remove(pos)
             colour = self.full_image.getColourAt(pos)
             self.display_pix[pos.x(), pos.y()] = colour
-          except Exception as e:
-            print("Error updating mask: {}".format(e.what()))
 
   def change_image(self, new_image, keep_mask=True):
 
@@ -314,6 +314,7 @@ class ImageHandler(QObject):
     #Add or remove from mask and update display
 
     add = True # TODO - hook to selector button state
+    add = self.selectionPick.isChecked()
     if add:
       self.update_masking(add=[pos])
     else:
