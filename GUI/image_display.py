@@ -14,6 +14,9 @@ from .recolour import RecolourDialog
 
 from math import floor
 
+_max_key_items = 20
+
+
 # TODO This is a bit of a God object. Should some functions be delegated to something else?
 
 class ImageHandler(QObject):
@@ -40,22 +43,22 @@ class ImageHandler(QObject):
 
   def check_for_image(self):
     return self.full_image is not None
-  
+
   def get_image(self):
     if(self.full_image):
       return self.full_image
     else:
       raise ValueError
-    
+
   def show_image_from_file(self, filename):
 
     self.full_image = imageExt.imageFromFile(filename)
-    self.change_image(self.full_image)  
-  
+    self.change_image(self.full_image)
+
   def change_image(self, new_image):
-  
+
     self.full_image = new_image
-    
+
     pixmap = self.full_image.getImage(opt=False).toqpixmap()
     sz = pixmap.size()
     sz_b = pixmap.size()
@@ -76,7 +79,7 @@ class ImageHandler(QObject):
 
     # Make sure this is backing image size, NOT pixmap size
     self.image_changed.emit(ImageStatePayload(sz_b, im_cols))
-    
+
   def show_key(self, changed = False):
 
     # Get new key
@@ -84,13 +87,13 @@ class ImageHandler(QObject):
       self.key = getKey(self.full_image)
 
     if self.key_layout is not None:
-      clearLayout(self.key_layout)    
-    
+      clearLayout(self.key_layout)
+
     else:
       self.key_layout = QGridLayout()
       self.key_pane.setLayout(self.key_layout)
       self.key_layout.setRowStretch(1, 0)
-    
+
     cnt = 0
     for item in self.key:
       colourName = " ".join(item[4])
@@ -106,8 +109,8 @@ class ImageHandler(QObject):
       self.key_layout.addWidget(keyItem, cnt, 0)
       self.key_layout.addWidget(keyBadge, cnt, 1)
       cnt = cnt + 1
-      # Limit to showing 20 items
-      if cnt > 20: 
+      # Limit to showing capped number of items
+      if cnt > _max_key_items:
         keyItem = QLabel("...")
         self.key_layout.addWidget(keyItem, cnt, 0)
         break
@@ -147,20 +150,20 @@ class ImageHandler(QObject):
 
   def modify_image_advanced(self, image, combine_payload):
     """Modify the given image according to the given ImageCombinePayload"""
-  
+
     recolourFromList(image, combine_payload.new, combine_payload.original)
     self.change_image(image)
-    
+
 
   def resize_image(self, image, resize_payload):
     """Modify the given image according to the given ImageResizePayload"""
-    
+
     resizeImage(image, resize_payload.width, resize_payload.height)
     self.change_image(image)
 
   def pattern_checks(self, details):
     # Show pattern details and verify anything "suspicious"
-    
+
     checks = self.pGen.checks(details, self.full_image.getImage(opt=False).size, len(self.full_image.colourCounts))
 
     checkDialog = PresaveDialog()
@@ -168,8 +171,8 @@ class ImageHandler(QObject):
     checkDialog.fill_settings(checks["settings"])
     checkDialog.show()
 
-    return checkDialog.exec() 
-    
+    return checkDialog.exec()
+
   @pyqtSlot(ImageChangePayload)
   def on_image_change_request(self, value):
     if self.full_image:
