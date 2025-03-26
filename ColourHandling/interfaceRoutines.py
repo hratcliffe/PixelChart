@@ -1,7 +1,7 @@
 # Module defining main colourHandling functions.
 # These are the ones we should be using elsewhere in app
 from . import imageExt
-from .replace import replaceColours, changeColours, addGuide, makeKeyItems, makeDummy, makeSwatchItem
+from .replace import replaceColours, changeColours, addGuide, makeKeyItems, makeDummy, makeSwatchItem, changeColourOfPixels
 from .symbols import getUpscaling
 from .identify import *
 from .transform import *
@@ -37,6 +37,10 @@ def adjustSaturation(image, new_sat):
   new_image = modifySaturation(image.getImage(False), new_sat)
   image.setImage(new_image)
 
+def recolourPixels(image, pixelList, newColour):
+  """Modify given image by replacing all pixels in pixelList with newColour"""
+  new_image = changeColourOfPixels(image.getImage(False), pixelList, newColour)
+  image.setImage(new_image)
 
 def recolourFromList(image, colourList, finalColour):
   """Modify given image by replacing all pixels with values in given colourList

@@ -8,7 +8,7 @@ from ColourHandling.interfaceRoutines import *
 
 from XStitchHeuristics.colours import colourChart
 from Graphics.pattern import PatternGenerator
-from .types import ImageStatePayload, ImageChangePayload, ImageSizePayload, PatternPayload, ImageCombinePayload, ImageEnhancePayload
+from .types import ImageStatePayload, ImageChangePayload, ImageSizePayload, PatternPayload, ImageCombinePayload, ImageEnhancePayload, ImagePixelRecolourPayload
 from .warnings import PresaveDialog
 from .recolour import RecolourDialog
 
@@ -34,6 +34,7 @@ class ImageHandler(QObject):
     self.display_image = None
     self._highlight = None
     self.selectionPick = window.selectionSelect
+
     self.key_layout = None
     self.key = None
     self.pGen = PatternGenerator()
@@ -45,6 +46,10 @@ class ImageHandler(QObject):
     self.image_hook.installEventFilter(self)
 
     self.colourPatch = window.swatch
+    self._last_colour_clicked = None
+
+    #Recolouring signal
+    window.recolourSelectionButton.clicked.connect(self.get_mask_and_recolour)
 
   def check_for_image(self):
     return self.full_image is not None
@@ -236,6 +241,24 @@ class ImageHandler(QObject):
     resizeImage(image, resize_payload.width, resize_payload.height)
     self.change_image(image, keep_mask=False)
 
+  def recolour_image_pixels(self, image, pixel_payload):
+    """Recolour the image by assigning selected pixels to new colour"""
+    #def recolourPixels(image, pixelList, newColour):
+    return recolourPixels(image, pixel_payload.pList, pixel_payload.newColour)
+
+  def get_mask_and_recolour(self):
+    """Get the masking, get a colour, recolour selection"""
+
+    if self.full_image and self._highlight and self._last_colour_clicked:
+
+      # TODO get new colour from key or optionally new triplet
+
+      # Mask and new colour
+      pix_payload = ImagePixelRecolourPayload(self._highlight, self._last_colour_clicked)
+
+      # Do the recolouring in place
+      self.recolour_image_pixels(self.full_image, pix_payload)
+
   def pattern_checks(self, details):
     # Show pattern details and verify anything "suspicious"
 
@@ -252,19 +275,26 @@ class ImageHandler(QObject):
   def on_image_change_request(self, value):
     if self.full_image:
       self.modify_image(self.full_image, value)
+
   @pyqtSlot(ImageEnhancePayload)
   def on_image_enhance_request(self, value):
     if self.full_image:
       self.enhance_image(self.full_image, value)
+
   @pyqtSlot(ImageCombinePayload)
   def on_image_combine_request(self, value):
     if self.full_image:
       self.modify_image_combine(self.full_image, value)
+
   @pyqtSlot(ImageSizePayload)
   def on_image_resize_request(self, value):
     if self.full_image:
       self.resize_image(self.full_image, value)
 
+  @pyqtSlot(ImagePixelRecolourPayload)
+  def on_image_pixel_recolour_request(self, value):
+    if self.full_image:
+      self.recolour_image_pixels(self.full_image, value)
 
   @pyqtSlot(str)
   def on_save_triggered(self, filename):
@@ -275,7 +305,7 @@ class ImageHandler(QObject):
 
   @pyqtSlot(PatternPayload)
   def on_pattern_save_triggered(self, value):
-    
+
     cont = self.pattern_checks(value.details)
     if not cont:
       return
@@ -307,6 +337,7 @@ class ImageHandler(QObject):
     colour = self.full_image.getColourAt(pos)
     if colour:
       swatch = QPixmap(50, 20)
+      self._last_colour_clicked= colour
       swatch.fill(QColor(colour[0], colour[1], colour[2]))
       self.colourPatch.setPixmap(swatch)
 

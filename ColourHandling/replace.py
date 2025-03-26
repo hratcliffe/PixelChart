@@ -48,6 +48,15 @@ def combineColoursFromList(originalImage, colourList, finalColour):
         pixels[i,j] = finalColour
   return originalImage
 
+def changeColourOfPixels(originalImage, pixelList, newColour):
+  """Change colour of pixels in given list to newColour"""
+
+  pixels = originalImage.load()
+
+  # pixelList should support .x and .y
+  for item in pixelList:
+    pixels[item.x(), item.y()] = newColour
+  return originalImage
 
 def replaceColours(originalImage, colourToSymbolMap, colour1, colour2 ):
   """Create the image with colours replaced by symbols

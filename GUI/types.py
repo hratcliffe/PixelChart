@@ -39,3 +39,10 @@ class ImageEnhancePayload():
     self.attr = attr
     self.oldValue = old
     self.newValue = new
+
+class ImagePixelRecolourPayload():
+  """Information on an pixel-list recolour change"""
+  def __init__(self, p_list, new_colour):
+    self.pList = p_list
+    self.newColour = new_colour
+
