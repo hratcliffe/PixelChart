@@ -51,6 +51,9 @@ class ImageHandler(QObject):
     #Recolouring signal
     window.recolourSelectionButton.clicked.connect(self.get_mask_and_recolour)
 
+    # Selection signals
+    window.selectionAllButton.clicked.connect(self.handleAllSelect)
+
   def check_for_image(self):
     return self.full_image is not None
 
@@ -65,13 +68,19 @@ class ImageHandler(QObject):
     self.full_image = imageExt.imageFromFile(filename)
     self.change_image(self.full_image)
 
-  def update_masking(self, add=None, remove=None, replace=None):
+  def update_masking(self, add=None, remove=None, replace=None, clear=None):
     # Update masked area in displayed image, and store list of masked pixels
     # Can supply any of add, remove or replace as a list of points. Priority is
-    # replace: others ignored
+    # clear: (True) remove all, ignore any other args
+    # replace: replace with given list,  subsequent args ignored
     # add then remove: if something in both it will end up _removed_
 
-    if replace:
+    if clear and self._highlight:
+      #Reset the display (if needed)
+      for pos in self._highlight:
+        self.display_pix[pos.x(), pos.y()] = self.full_image.getColourAt(pos)
+      self._highlight = None
+    elif replace:
       for pos in replace:
         self.display_pix[pos.x(), pos.y()] = _mask_colour
       self._highlight = replace
@@ -349,6 +358,16 @@ class ImageHandler(QObject):
       self.update_masking(add=[pos])
     else:
       self.update_masking(remove=[pos])
+
+    self.refresh_display()
+
+  def handleAllSelect(self):
+
+    add = self.selectionPick.isChecked()
+    if add:
+      pass
+    else:
+      self.update_masking(clear=True)
 
     self.refresh_display()
 
