@@ -68,6 +68,7 @@ class ImageHandler(QObject):
     self.full_image = imageExt.imageFromFile(filename)
     self.change_image(self.full_image)
 
+  # TODO refactor to action and list?
   def update_masking(self, add=None, remove=None, replace=None, clear=None):
     # Update masked area in displayed image, and store list of masked pixels
     # Can supply any of add, remove or replace as a list of points. Priority is
@@ -75,24 +76,27 @@ class ImageHandler(QObject):
     # replace: replace with given list,  subsequent args ignored
     # add then remove: if something in both it will end up _removed_
 
-    if clear and self._highlight:
+    if clear:
       #Reset the display (if needed)
-      for pos in self._highlight:
-        self.display_pix[pos.x(), pos.y()] = self.full_image.getColourAt(pos)
+      if self._highlight:
+        for pos in self._highlight:
+          self.display_pix[pos.x(), pos.y()] = self.full_image.getColourAt(pos)
       self._highlight = None
     elif replace:
+      # Replace selection with new
       for pos in replace:
         self.display_pix[pos.x(), pos.y()] = _mask_colour
       self._highlight = replace
     else:
       if add:
+        #Add to selection
         for pos in add:
           self.display_pix[pos.x(), pos.y()] = _mask_colour
         if self._highlight:
           self._highlight = self._highlight + add
         else:
           self._highlight = add
-      if remove:
+      if remove and self._highlight:   #If None selected, nothing to do
         for pos in remove:
           #Might get remove request due to clicking outside mask!
           if pos in self._highlight:
@@ -346,7 +350,7 @@ class ImageHandler(QObject):
     colour = self.full_image.getColourAt(pos)
     if colour:
       swatch = QPixmap(50, 20)
-      self._last_colour_clicked= colour
+      self._last_colour_clicked = colour
       swatch.fill(QColor(colour[0], colour[1], colour[2]))
       self.colourPatch.setPixmap(swatch)
 
@@ -365,7 +369,13 @@ class ImageHandler(QObject):
 
     add = self.selectionPick.isChecked()
     if add:
-      pass
+      col = self._last_colour_clicked
+      pixelList = findPixelsOfColour(self.full_image.getImage(False), col)
+      newList = []
+      for item in pixelList:
+        pt = QPointF(item[0], item[1])
+        newList.append(pt)
+      self.update_masking(replace=newList)
     else:
       self.update_masking(clear=True)
 

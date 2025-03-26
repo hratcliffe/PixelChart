@@ -6,7 +6,7 @@ from .symbols import getUpscaling
 from .identify import *
 from .transform import *
 from .reduceColours import combineColours, getSimilarColours, mergeColours, mergeColoursEmphasized
-
+from .select import findPixelsOfColour
 
 def reduceColours(image, n_cols, emph=None, opt=False):
   """Modify given image to have exactly n_cols distinct colours"""
