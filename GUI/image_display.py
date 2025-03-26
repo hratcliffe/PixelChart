@@ -344,7 +344,6 @@ class ImageHandler(QObject):
   def updateMask(self, pos):
     #Add or remove from mask and update display
 
-    add = True # TODO - hook to selector button state
     add = self.selectionPick.isChecked()
     if add:
       self.update_masking(add=[pos])
