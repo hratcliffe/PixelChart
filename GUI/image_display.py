@@ -11,6 +11,7 @@ from Graphics.pattern import PatternGenerator
 from .types import ImageStatePayload, ImageChangePayload, ImageSizePayload, PatternPayload, ImageCombinePayload, ImageEnhancePayload, ImagePixelRecolourPayload
 from .warnings import PresaveDialog
 from .recolour import RecolourDialog
+from .colour_combiner import ColourSelect
 
 from math import floor
 
@@ -268,10 +269,20 @@ class ImageHandler(QObject):
 
     if self.full_image and self._highlight and self._last_colour_clicked:
 
-      # TODO get new colour from key or optionally new triplet
+      dialog = ColourSelect(self.full_image.getColours())
+      result = dialog.exec()
+
+      newColour = dialog.get_selection()
+
+      if not newColour:
+        #Nothing picked
+        return
+
+      if(len(newColour) > 3):
+        newColour = (newColour[0], newColour[1], newColour[2])
 
       # Mask and new colour
-      pix_payload = ImagePixelRecolourPayload(self._highlight, self._last_colour_clicked)
+      pix_payload = ImagePixelRecolourPayload(self._highlight, newColour)
 
       # Do the recolouring in place
       self.recolour_image_pixels(self.full_image, pix_payload)

@@ -215,4 +215,72 @@ class ColourCombiner(QWidget):
 
     return selections
 
+class ColourSelect(QDialog):
+  """Dialog box for a colour Picker.
+  Shortlist is passed to this widget. Callback is invoked with an
+  ImageCombinePayload when dialog is dismissed
+  """
 
+  widget_file = files('GUI').joinpath('ColourSelect.ui')
+
+  def __init__(self, keyList):
+    super(ColourSelect, self).__init__()
+    loadUi(self.widget_file, self) # Load the .ui file
+
+
+    # Store key colours
+    self._colourList = keyList
+    self.setup_layout(keyList)
+
+    self._accept = False
+    self._picked = None
+
+    self.manualAccept.clicked.connect(self.pick_manual)
+    self.cancelButton.clicked.connect(self.close)
+
+  def setup_layout(self, colourList):
+    """Set up widget layout - a list of coloured swatches and a push button
+    for each entry in colourList (can be 3 or 4 element colours, transparency ignored)
+    Push buttons invoke the do_combine function with a colour number
+    """
+    # Setup coloured swatches and buttons
+    for num, cMatch in enumerate(colourList):
+
+      # Make coloured swatch and place in grid
+      match = QLabel()
+      swatch = QPixmap(100, 20)
+      cMatch = colourList[num]
+      swatch.fill(QColor(cMatch[0], cMatch[1], cMatch[2]))
+      match.setPixmap(swatch)
+
+      self.gridLayout.addWidget(match, num+1, 0)
+      match.adjustSize()
+
+      # Make push button. Attach number in list as data. Place
+      rButt = QPushButton(self)
+      rButt.setProperty("colourNum", QVariant(num))
+      rButt.setText("Select")
+      rButt.clicked.connect(self.pick_key)
+      self.gridLayout.addWidget(rButt, num+1, 1)
+
+  def pick_manual(self):
+    self._accept = True
+    self._picked = (self.r_select.value(), self.g_select.value(), self.b_select.value())
+
+    self.close()
+
+  def pick_key(self):
+    self._accept = True
+
+    num = int(self.sender().property("colourNum"))
+    self._picked = self._colourList[num]
+
+    self.close()
+
+  def get_selection(self):
+    """Return selected colour as triplet"""
+
+    if self._accept:
+        return self._picked
+    else:
+      return None
