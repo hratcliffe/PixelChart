@@ -76,17 +76,18 @@ class ImageHandler(QObject):
     # replace: replace with given list,  subsequent args ignored
     # add then remove: if something in both it will end up _removed_
 
-    if clear:
+    if clear or replace:
       #Reset the display (if needed)
       if self._highlight:
         for pos in self._highlight:
           self.display_pix[pos.x(), pos.y()] = self.full_image.getColourAt(pos)
-      self._highlight = None
-    elif replace:
-      # Replace selection with new
-      for pos in replace:
-        self.display_pix[pos.x(), pos.y()] = _mask_colour
-      self._highlight = replace
+      if clear:
+        self._highlight = None
+      elif replace:
+        # Replace selection with new
+        for pos in replace:
+          self.display_pix[pos.x(), pos.y()] = _mask_colour
+        self._highlight = replace
     else:
       if add:
         #Add to selection
