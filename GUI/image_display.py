@@ -18,6 +18,9 @@ _max_key_items = 20
 
 _mask_colour = (158, 0, 158)
 
+#Buttons for select/deselect. A applies replace/clear, B applies add/remove, C applies TBA
+_button_labels = {'select':{'A':'All', 'B':'Add', 'C':'Grow'}, 'deselect':{'A':'All', 'B':'Remove', 'C':'Shrink'}}
+
 # TODO This is a bit of a God object. Should some functions be delegated to something else?
 
 class ImageHandler(QObject):
@@ -34,6 +37,7 @@ class ImageHandler(QObject):
     self.display_image = None
     self._highlight = None
     self.selectionPick = window.selectionSelect
+    self.selectionButtons = {'A':window.selectionAButton, 'B':window.selectionBButton}
 
     self.key_layout = None
     self.key = None
@@ -47,12 +51,15 @@ class ImageHandler(QObject):
 
     self.colourPatch = window.swatch
     self._last_colour_clicked = None
+    self.setButtonLabels()
 
     #Recolouring signal
     window.recolourSelectionButton.clicked.connect(self.get_mask_and_recolour)
 
     # Selection signals
-    window.selectionAllButton.clicked.connect(self.handleAllSelect)
+    window.selectionAButton.clicked.connect(self.handleASelect)
+    window.selectionBButton.clicked.connect(self.handleBSelect)
+    window.selectionSelect.toggled.connect(self.setButtonLabels)
 
   def check_for_image(self):
     return self.full_image is not None
@@ -366,9 +373,11 @@ class ImageHandler(QObject):
 
     self.refresh_display()
 
-  def handleAllSelect(self):
+  def handleASelect(self):
+    """First button - 'exclusive' sort of select/deselect"""
 
     add = self.selectionPick.isChecked()
+
     if add:
       col = self._last_colour_clicked
       pixelList = findPixelsOfColour(self.full_image.getImage(False), col)
@@ -381,6 +390,37 @@ class ImageHandler(QObject):
       self.update_masking(clear=True)
 
     self.refresh_display()
+
+  def handleBSelect(self):
+    """Second button - 'intersect' sort of select/deselect"""
+
+    add = self.selectionPick.isChecked()
+
+    col = self._last_colour_clicked
+    pixelList = findPixelsOfColour(self.full_image.getImage(False), col)
+    newList = []
+    for item in pixelList:
+      pt = QPointF(item[0], item[1])
+      newList.append(pt)
+
+    if add:
+      self.update_masking(add=newList)
+    else:
+      self.update_masking(remove=newList)
+
+    self.refresh_display()
+
+
+  def setButtonLabels(self):
+    #Update button labels according to state
+    add = self.selectionPick.isChecked()
+    if add:
+      button_labels = _button_labels['select']
+    else:
+      button_labels = _button_labels['deselect']
+
+    self.selectionButtons['A'].setText(button_labels['A'])
+    self.selectionButtons['B'].setText(button_labels['B'])
 
 def clearLayout(layout):
   # From https://stackoverflow.com/questions/4528347/clear-all-widgets-in-a-layout-in-pyqt  or https://stackoverflow.com/a/10067548

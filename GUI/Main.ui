@@ -755,22 +755,22 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="selectionAllButton">
+           <widget class="QPushButton" name="selectionAButton">
             <property name="toolTip">
-             <string>Select all pixels of this colour/deselect all</string>
+             <string>Select this colour/deselect all</string>
             </property>
             <property name="text">
-             <string>All</string>
+             <string>A</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="selectionGrowButton">
+           <widget class="QPushButton" name="selectionBButton">
             <property name="toolTip">
-             <string>Grow selection by 1 pixel</string>
+             <string>Add/remove colour from selection</string>
             </property>
             <property name="text">
-             <string>Grow</string>
+             <string>B</string>
             </property>
            </widget>
           </item>
