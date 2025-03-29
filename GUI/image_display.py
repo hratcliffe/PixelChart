@@ -130,10 +130,6 @@ class ImageHandler(QObject):
     if not keep_mask:
       self._highlight = None
 
-    # TEST CODE
-    #new_mask = [QPointF(50, 50), QPointF(51,51), QPointF(51,50)]
-    #self._highlight = new_mask
-
     # If image has changed and mask is present, re-do
     if self._highlight:
       self.update_masking(replace = self._highlight)
