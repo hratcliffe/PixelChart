@@ -223,7 +223,7 @@ class ColourSelect(QDialog):
 
   widget_file = files('GUI').joinpath('ColourSelect.ui')
 
-  def __init__(self, keyList):
+  def __init__(self, keyList, preset=None):
     super(ColourSelect, self).__init__()
     loadUi(self.widget_file, self) # Load the .ui file
 
@@ -231,6 +231,8 @@ class ColourSelect(QDialog):
     # Store key colours
     self._colourList = keyList
     self.setup_layout(keyList)
+    if preset:
+      self.setup_selector(preset)
 
     self._accept = False
     self._picked = None
@@ -262,6 +264,12 @@ class ColourSelect(QDialog):
       rButt.setText("Select")
       rButt.clicked.connect(self.pick_key)
       self.gridLayout.addWidget(rButt, num+1, 1)
+
+  def setup_selector(self, preset):
+
+    self.r_select.setValue(preset[0])
+    self.g_select.setValue(preset[1])
+    self.b_select.setValue(preset[2])
 
   def pick_manual(self):
     self._accept = True

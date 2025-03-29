@@ -269,7 +269,7 @@ class ImageHandler(QObject):
 
     if self.full_image and self._highlight and self._last_colour_clicked:
 
-      dialog = ColourSelect(self.full_image.getColours())
+      dialog = ColourSelect(self.full_image.getColours(), self._last_colour_clicked)
       result = dialog.exec()
 
       newColour = dialog.get_selection()
